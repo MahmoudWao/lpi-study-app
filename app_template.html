@@ -3,1216 +3,643 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LPI Linux Essentials 010 — Guided Discovery Study</title>
+<title>LPI Linux Essentials 010 — Study App</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0f0f1a;--surface:#1a1a2e;--card:#16213e;--card2:#0f3460;
-  --accent:#e94560;--accent2:#0ea5e9;--accent3:#8b5cf6;--green:#22c55e;--amber:#f59e0b;
-  --text:#eaeaea;--muted:#94a3b8;--border:#2d3748;--radius:10px;
+  --bg:#f8fafc;--surface:#ffffff;--card:#f1f5f9;
+  --primary:#6366f1;--primary-light:#e0e7ff;--primary-dark:#4338ca;
+  --green:#10b981;--green-light:#d1fae5;
+  --amber:#f59e0b;--amber-light:#fef3c7;
+  --red:#ef4444;--red-light:#fee2e2;
+  --text:#1e293b;--muted:#64748b;--light:#94a3b8;
+  --border:#e2e8f0;--shadow:0 1px 3px rgba(0,0,0,0.08);
+  --radius:12px;
 }
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
-.app{max-width:860px;margin:0 auto;padding:1rem}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+.app{max-width:680px;margin:0 auto;padding:1rem}
 
-/* Header */
-.header{text-align:center;padding:1.5rem 0;margin-bottom:1rem}
-.header h1{font-size:1.4rem;color:var(--accent2);letter-spacing:-0.5px}
-.header p{color:var(--muted);font-size:0.82rem;margin-top:0.25rem}
-.streak-badge{display:inline-flex;align-items:center;gap:0.3rem;background:var(--card);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-top:0.5rem;color:var(--amber)}
+/* Header - minimal */
+.header{display:flex;align-items:center;justify-content:space-between;padding:0.8rem 0;margin-bottom:0.5rem}
+.header h1{font-size:1.1rem;font-weight:700;color:var(--primary)}
+.streak{display:flex;align-items:center;gap:0.3rem;background:var(--amber-light);padding:0.3rem 0.7rem;border-radius:20px;font-size:0.78rem;font-weight:600;color:#92400e}
 
-/* Navigation */
-.nav{display:flex;gap:0.4rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
-.nav button{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:0.55rem 1rem;border-radius:var(--radius);cursor:pointer;font-size:0.82rem;transition:all 0.2s}
-.nav button:hover{color:var(--text);border-color:var(--accent2)}
-.nav button.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+/* Nav - pill style */
+.nav{display:flex;gap:0.3rem;background:var(--card);padding:0.3rem;border-radius:10px;margin-bottom:1.5rem}
+.nav button{flex:1;background:none;border:none;padding:0.6rem 0.5rem;border-radius:8px;cursor:pointer;font-size:0.8rem;font-weight:500;color:var(--muted);transition:all 0.2s}
+.nav button:hover{color:var(--text)}
+.nav button.active{background:var(--surface);color:var(--primary);font-weight:600;box-shadow:var(--shadow)}
 
 /* Topic pills */
-.pills{display:flex;gap:0.3rem;flex-wrap:wrap;justify-content:center;margin-bottom:1rem}
-.pills button{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:0.3rem 0.7rem;border-radius:20px;cursor:pointer;font-size:0.75rem;transition:all 0.15s}
-.pills button:hover,.pills button.active{color:var(--text);border-color:var(--accent2);background:var(--card2)}
+.pills{display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.pills button{background:var(--surface);border:1.5px solid var(--border);color:var(--muted);padding:0.35rem 0.75rem;border-radius:20px;cursor:pointer;font-size:0.75rem;font-weight:500;transition:all 0.15s}
+.pills button:hover,.pills button.active{color:var(--primary);border-color:var(--primary);background:var(--primary-light)}
 
-/* Cards / Section list */
-.grid{display:grid;gap:0.7rem}
-.sec-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
-.sec-card:hover{border-color:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(14,165,233,0.1)}
-.sec-card h3{font-size:0.92rem;color:var(--accent2);font-weight:600}
-.sec-card .meta{font-size:0.75rem;color:var(--muted);margin-top:0.25rem;display:flex;gap:0.8rem;align-items:center}
-.sec-card .mastery{position:absolute;right:1rem;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700}
-.mastery-0{border:2px solid var(--border);color:var(--muted)}
-.mastery-1{border:2px solid var(--amber);color:var(--amber)}
-.mastery-2{border:2px solid var(--accent2);color:var(--accent2)}
-.mastery-3{border:2px solid var(--green);color:var(--green);background:rgba(34,197,94,0.1)}
+/* Section cards */
+.grid{display:grid;gap:0.6rem}
+.sec-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:1rem}
+.sec-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(99,102,241,0.1);transform:translateY(-1px)}
+.sec-card .icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sec-card .info{flex:1;min-width:0}
+.sec-card h3{font-size:0.88rem;font-weight:600;color:var(--text)}
+.sec-card .meta{font-size:0.73rem;color:var(--muted);margin-top:0.15rem}
+.sec-card .ring{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0}
+.ring-1{border-color:var(--amber);color:var(--amber)}
+.ring-2{border-color:var(--primary);color:var(--primary)}
+.ring-3{border-color:var(--green);color:var(--green);background:var(--green-light)}
 
-/* Panel */
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem}
-.panel h2{font-size:1.05rem;color:var(--accent2);margin-bottom:0.8rem;font-weight:600}
-.back-btn{background:none;border:none;color:var(--accent2);cursor:pointer;font-size:0.82rem;padding:0.3rem 0;margin-bottom:0.8rem;display:inline-flex;align-items:center;gap:0.3rem}
-.back-btn:hover{text-decoration:underline}
+/* Focus card - the ONE question at a time */
+.focus{background:var(--surface);border-radius:16px;padding:2rem 1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.06);text-align:center;animation:slideUp 0.3s ease}
+.focus-label{display:inline-flex;align-items:center;gap:0.3rem;font-size:0.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem}
+.focus-q{font-size:1.05rem;font-weight:500;line-height:1.7;max-width:560px;margin:0 auto 1.5rem;text-align:left;white-space:pre-wrap;word-break:break-word}
+.focus-progress{display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem;justify-content:center}
+.focus-progress .bar{flex:1;max-width:200px;height:5px;background:var(--card);border-radius:3px;overflow:hidden}
+.focus-progress .fill{height:100%;background:var(--primary);border-radius:3px;transition:width 0.4s}
+.focus-progress span{font-size:0.75rem;color:var(--muted)}
 
-/* Challenge Mode (Problem-First) */
-.challenge{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem}
-.challenge-label{display:inline-block;background:var(--accent);color:#fff;font-size:0.7rem;padding:0.2rem 0.6rem;border-radius:12px;margin-bottom:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
-.challenge-q{font-size:1rem;line-height:1.7;margin-bottom:1.2rem}
-.challenge-hint{background:var(--surface);border-left:3px solid var(--amber);padding:0.8rem 1rem;border-radius:0 6px 6px 0;margin-bottom:1rem;font-size:0.85rem;color:var(--muted);display:none}
-.challenge-hint.show{display:block}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.7rem 1.5rem;border-radius:8px;border:none;cursor:pointer;font-size:0.85rem;font-weight:600;transition:all 0.15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-outline{background:var(--surface);border:1.5px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:0.5rem 1rem;font-size:0.8rem}
 
-/* Self-grading buttons */
-.grade-btns{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem}
-.grade-btn{padding:0.5rem 1.2rem;border-radius:6px;border:none;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.15s}
-.grade-btn:hover{transform:scale(1.02)}
-.grade-btn.wrong{background:#dc2626;color:#fff}
-.grade-btn.hard{background:var(--amber);color:#000}
-.grade-btn.good{background:var(--accent2);color:#fff}
-.grade-btn.easy{background:var(--green);color:#fff}
+/* Grade buttons - Brilliant style (emoji + color) */
+.grades{display:flex;gap:0.5rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap}
+.grade{display:flex;flex-direction:column;align-items:center;gap:0.2rem;padding:0.7rem 1.2rem;border-radius:10px;border:2px solid var(--border);cursor:pointer;transition:all 0.15s;background:var(--surface);min-width:70px}
+.grade:hover{transform:scale(1.05)}
+.grade .emoji{font-size:1.3rem}
+.grade .label{font-size:0.68rem;font-weight:600;color:var(--muted)}
+.grade-0:hover,.grade-0.picked{border-color:var(--red);background:var(--red-light)}
+.grade-1:hover,.grade-1.picked{border-color:var(--amber);background:var(--amber-light)}
+.grade-2:hover,.grade-2.picked{border-color:var(--primary);background:var(--primary-light)}
+.grade-3:hover,.grade-3.picked{border-color:var(--green);background:var(--green-light)}
 
 /* Answer reveal */
-.answer-section{margin-top:1rem;padding:1rem 1.2rem;background:var(--surface);border-radius:8px;border-left:3px solid var(--green);display:none;animation:fadeIn 0.3s}
-.answer-section.show{display:block}
-.reveal-btn{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:0.6rem 1.5rem;border-radius:6px;cursor:pointer;font-size:0.85rem;transition:all 0.2s}
-.reveal-btn:hover{border-color:var(--accent2)}
+.answer{background:var(--card);border-radius:var(--radius);padding:1.2rem 1.5rem;margin-top:1.2rem;text-align:left;white-space:pre-wrap;word-break:break-word;font-size:0.9rem;line-height:1.7;animation:fadeIn 0.3s;border-left:4px solid var(--green)}
+.answer-hidden{display:none}
 
-/* Reading mode */
-.lesson-text{white-space:pre-wrap;font-size:0.88rem;line-height:1.8;color:var(--text);max-height:500px;overflow-y:auto;padding-right:0.5rem}
-.lesson-text::-webkit-scrollbar{width:4px}
-.lesson-text::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+/* Encouragement messages */
+.encourage{text-align:center;padding:1.5rem;animation:fadeIn 0.4s}
+.encourage .big{font-size:2rem;margin-bottom:0.5rem}
+.encourage h3{font-size:1rem;color:var(--text);margin-bottom:0.3rem}
+.encourage p{font-size:0.85rem;color:var(--muted)}
 
 /* Flashcard */
-.fc-container{perspective:1000px;margin:1.5rem auto;max-width:580px}
-.fc{position:relative;width:100%;min-height:220px;cursor:pointer;transform-style:preserve-3d;transition:transform 0.4s}
+.fc-wrap{perspective:1000px;margin:1.5rem auto;max-width:500px}
+.fc{position:relative;width:100%;min-height:240px;cursor:pointer;transform-style:preserve-3d;transition:transform 0.5s}
 .fc.flipped{transform:rotateY(180deg)}
-.fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;padding:1.5rem 2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.fc-front{background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid var(--border)}
-.fc-back{background:linear-gradient(135deg,#0c2d48,var(--card));border:1px solid var(--green);transform:rotateY(180deg)}
-.fc-front h3{font-size:0.95rem;line-height:1.6}
-.fc-back p{font-size:0.88rem;line-height:1.6;white-space:pre-wrap}
-.fc-type{font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;padding:2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.fc-front{background:var(--surface);border:2px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+.fc-back{background:var(--green-light);border:2px solid var(--green);transform:rotateY(180deg)}
+.fc-front h3{font-size:0.95rem;line-height:1.6;font-weight:500}
+.fc-back p{font-size:0.9rem;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.fc-type{font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem;font-weight:600;text-transform:uppercase;letter-spacing:0.3px}
 .fc-nav{display:flex;justify-content:center;align-items:center;gap:0.8rem;margin-top:1rem}
-.fc-nav button{background:var(--card);border:1px solid var(--border);color:var(--text);padding:0.45rem 0.9rem;border-radius:6px;cursor:pointer;font-size:0.8rem}
-.fc-nav button:hover{border-color:var(--accent2)}
-.fc-counter{color:var(--muted);font-size:0.8rem}
+.fc-nav button{background:var(--surface);border:1.5px solid var(--border);color:var(--text);padding:0.5rem 1rem;border-radius:8px;cursor:pointer;font-size:0.8rem}
+.fc-nav button:hover{border-color:var(--primary)}
 .fc-hint{color:var(--muted);font-size:0.75rem;text-align:center;margin-top:0.5rem}
 
 /* Progress */
-.progress-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin:0.5rem 0}
+.progress-bar{height:6px;background:var(--card);border-radius:3px;overflow:hidden}
 .progress-fill{height:100%;border-radius:3px;transition:width 0.4s}
-.pf-blue{background:var(--accent2)}
+.pf-primary{background:var(--primary)}
 .pf-green{background:var(--green)}
-.pf-amber{background:var(--amber)}
-.stats{display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;margin:1rem 0}
-.stat{background:var(--card);padding:0.8rem 1.2rem;border-radius:8px;text-align:center;min-width:90px}
-.stat .n{font-size:1.3rem;font-weight:700;color:var(--accent2)}
-.stat .l{font-size:0.7rem;color:var(--muted);margin-top:0.15rem}
-
-/* Difficulty badge */
-.diff{display:inline-block;font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:10px;text-transform:uppercase;font-weight:600;letter-spacing:0.3px}
-.diff-basic{background:rgba(34,197,94,0.15);color:var(--green)}
-.diff-intermediate{background:rgba(14,165,233,0.15);color:var(--accent2)}
-.diff-advanced{background:rgba(139,92,246,0.15);color:var(--accent3)}
-
-/* Tabs inside section */
-.tabs{display:flex;gap:0.3rem;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem}
-.tabs button{background:none;border:none;color:var(--muted);padding:0.4rem 0.8rem;cursor:pointer;font-size:0.82rem;border-radius:6px 6px 0 0;transition:all 0.15s}
-.tabs button:hover{color:var(--text)}
-.tabs button.active{color:var(--accent2);background:var(--card);font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:0.6rem;margin:1rem 0}
+.stat{background:var(--surface);border:1.5px solid var(--border);padding:1rem;border-radius:var(--radius);text-align:center}
+.stat .n{font-size:1.5rem;font-weight:700;color:var(--primary)}
+.stat .l{font-size:0.7rem;color:var(--muted);margin-top:0.1rem}
 
 /* Terminal */
-.term-wrap{background:#0d1117;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.term-bar{background:#161b22;padding:0.4rem 0.8rem;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid var(--border)}
+.term-wrap{background:#1e1e2e;border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+.term-bar{background:#313244;padding:0.5rem 1rem;display:flex;align-items:center;gap:0.4rem}
 .term-dot{width:10px;height:10px;border-radius:50%}
-.term-bar span{font-size:0.75rem;color:var(--muted);margin-left:auto}
-.term-body{padding:0.8rem 1rem;font-family:'Cascadia Code','Fira Code','Courier New',monospace;font-size:0.82rem;min-height:320px;max-height:450px;overflow-y:auto}
+.term-bar span{font-size:0.72rem;color:#a6adc8;margin-left:auto}
+.term-body{padding:1rem;font-family:'Cascadia Code','Fira Code','Courier New',monospace;font-size:0.8rem;min-height:300px;max-height:400px;overflow-y:auto;color:#cdd6f4}
 .term-body::-webkit-scrollbar{width:4px}
-.term-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.term-line{margin:0.1rem 0;white-space:pre-wrap;word-break:break-all}
-.term-line .prompt{color:var(--green)}
-.term-line .path{color:var(--accent2)}
-.term-line .cmd{color:var(--text)}
-.term-line .output{color:var(--muted)}
-.term-line .error{color:var(--accent)}
+.term-body::-webkit-scrollbar-thumb{background:#45475a;border-radius:2px}
+.term-line{margin:0.15rem 0;white-space:pre-wrap;word-break:break-all}
+.term-line .prompt{color:#a6e3a1}
+.term-line .path{color:#89b4fa}
+.term-line .error{color:#f38ba8}
 .term-input-line{display:flex;align-items:center;margin-top:0.2rem}
-.term-input-line .prompt{color:var(--green)}
-.term-input-line .path{color:var(--accent2)}
-.term-input{background:none;border:none;color:var(--text);font-family:inherit;font-size:inherit;flex:1;outline:none;margin-left:0.3rem;caret-color:var(--green)}
-.term-tasks{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;margin-bottom:1rem}
-.term-tasks h3{font-size:0.9rem;color:var(--accent2);margin-bottom:0.5rem}
-.term-task{display:flex;align-items:flex-start;gap:0.5rem;padding:0.3rem 0;font-size:0.82rem}
-.term-task .check{color:var(--green);min-width:16px}
-.term-task .pending{color:var(--border);min-width:16px}
+.term-input-line .prompt{color:#a6e3a1}
+.term-input-line .path{color:#89b4fa}
+.term-input{background:none;border:none;color:#cdd6f4;font-family:inherit;font-size:inherit;flex:1;outline:none;margin-left:0.3rem;caret-color:#a6e3a1}
+.term-tasks{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;margin-bottom:1rem}
+.term-tasks h3{font-size:0.88rem;font-weight:600;margin-bottom:0.6rem;color:var(--text)}
+.term-task{display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;font-size:0.82rem}
+.term-task .check{color:var(--green)}
+.term-task .pending{color:var(--border)}
 .term-task.done{color:var(--muted);text-decoration:line-through}
 
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+/* Learn mode */
+.panel{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.panel h2{font-size:1rem;font-weight:700;margin-bottom:0.8rem}
+.tabs{display:flex;gap:0.2rem;background:var(--card);padding:0.25rem;border-radius:8px;margin-bottom:1rem}
+.tabs button{flex:1;background:none;border:none;padding:0.5rem;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:500;color:var(--muted)}
+.tabs button.active{background:var(--surface);color:var(--primary);font-weight:600;box-shadow:var(--shadow)}
+.lesson-text{white-space:pre-wrap;word-break:break-word;font-size:0.87rem;line-height:1.8;max-height:500px;overflow-y:auto;color:var(--text)}
+
+.back-btn{background:none;border:none;color:var(--primary);cursor:pointer;font-size:0.82rem;padding:0.3rem 0;margin-bottom:0.8rem;font-weight:500}
+.back-btn:hover{text-decoration:underline}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
 @media(max-width:600px){
-  .app{padding:0.5rem}
-  .panel{padding:1rem}
-  .challenge{padding:1rem}
-  .nav button{padding:0.5rem 0.7rem;font-size:0.78rem}
-  .fc-face{padding:1.2rem 1rem}
-  .fc-front h3{font-size:0.88rem}
-  .term-body{min-height:250px;max-height:55vh;font-size:0.78rem}
+  .app{padding:0.8rem}
+  .focus{padding:1.5rem 1rem}
+  .focus-q{font-size:0.95rem}
+  .nav button{font-size:0.75rem;padding:0.5rem 0.3rem}
+  .grades{gap:0.4rem}
+  .grade{padding:0.6rem 0.8rem;min-width:60px}
+  .term-body{min-height:240px;max-height:55vh;font-size:0.75rem}
   .term-input{font-size:16px}
-  .grade-btns{gap:0.4rem}
-  .grade-btn{padding:0.6rem 0.9rem;font-size:0.8rem}
-  .sec-card{padding:0.9rem 1rem}
-  .pills button{padding:0.35rem 0.6rem;font-size:0.72rem}
-  .lesson-text{font-size:0.84rem;max-height:60vh}
-  .stats{gap:0.5rem}
-  .stat{padding:0.6rem 0.8rem;min-width:70px}
+  .stats{grid-template-columns:repeat(2,1fr)}
 }
-.exercise-text,.lesson-text,.challenge-q,.answer-section p,.fc-back p,.term-line{word-break:break-word;overflow-wrap:break-word}
 </style>
 </head>
 <body>
 <div class="app" id="root"></div>
 <script>
-// === DATA INJECTION POINT ===
 const DATA = __STRUCTURED_DATA__;
 
 const TOPICS = {
-  '1': 'The Linux Community and a Career in Open Source',
-  '2': 'Finding Your Way on a Linux System',
+  '1': 'The Linux Community & Open Source',
+  '2': 'Finding Your Way on Linux',
   '3': 'The Power of the Command Line',
   '4': 'The Linux Operating System',
-  '5': 'Security and File Permissions'
+  '5': 'Security & File Permissions'
 };
 
-// === STATE MANAGEMENT ===
+const ENCOURAGEMENTS = [
+  {big:'🎯',h:'Nailed it!',p:'You\'re building real understanding.'},
+  {big:'🧠',h:'Great recall!',p:'That knowledge is sticking.'},
+  {big:'⚡',h:'Quick thinking!',p:'Your Linux skills are growing.'},
+  {big:'🚀',h:'On fire!',p:'Keep this momentum going.'},
+  {big:'💪',h:'Solid work!',p:'Every answer strengthens your knowledge.'},
+];
+
 const STORAGE_KEY = 'lpi_brilliant_v2';
 let S = loadState();
 
-function loadState() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (saved && saved.version === 2) return saved;
-  } catch(e) {}
-  return defaultState();
-}
+function loadState(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY));if(s&&s.version===2)return s}catch(e){}return defaultState()}
+function defaultState(){return{version:2,mode:'challenge',topicFilter:null,currentSection:null,sectionTab:'lesson',cards:{},streak:0,lastStudyDate:null,totalReviews:0,mastery:{},fcIdx:0,fcFlipped:false,fcFilter:'due'}}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(S))}
 
-function defaultState() {
-  return {
-    version: 2,
-    mode: 'challenge',
-    topicFilter: null,
-    currentSection: null,
-    sectionTab: 'challenge',
-    // Spaced repetition data per card
-    cards: {},  // cardId -> {interval, ease, due, reps, lapses}
-    // Session tracking
-    streak: 0,
-    lastStudyDate: null,
-    totalReviews: 0,
-    sessionsCompleted: 0,
-    // Section mastery
-    mastery: {},  // secId -> {seen, correct, total, level}
-    // Flashcard state
-    fcIdx: 0,
-    fcFlipped: false,
-    fcFilter: 'due'
-  };
-}
-
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(S));
-}
-
-function updateStreak() {
-  const today = new Date().toDateString();
-  if (S.lastStudyDate !== today) {
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-    S.streak = (S.lastStudyDate === yesterday) ? S.streak + 1 : 1;
-    S.lastStudyDate = today;
-    save();
+function updateStreak(){
+  const today=new Date().toDateString();
+  if(S.lastStudyDate!==today){
+    const yesterday=new Date(Date.now()-86400000).toDateString();
+    S.streak=(S.lastStudyDate===yesterday)?S.streak+1:1;
+    S.lastStudyDate=today;save();
   }
 }
 
-// === SPACED REPETITION (SM-2 variant) ===
-function getCardState(cardId) {
-  if (!S.cards[cardId]) {
-    S.cards[cardId] = { interval: 0, ease: 2.5, due: 0, reps: 0, lapses: 0 };
-  }
-  return S.cards[cardId];
-}
-
-function gradeCard(cardId, grade) {
-  // grade: 0=wrong, 1=hard, 2=good, 3=easy
-  const c = getCardState(cardId);
-  const now = Date.now();
-  
-  if (grade === 0) {
-    c.reps = 0;
-    c.interval = 1;
-    c.lapses++;
-    c.ease = Math.max(1.3, c.ease - 0.2);
-  } else {
-    if (c.reps === 0) {
-      c.interval = 1;
-    } else if (c.reps === 1) {
-      c.interval = 3;
-    } else {
-      c.interval = Math.round(c.interval * c.ease);
-    }
-    c.reps++;
-    c.ease += (grade === 3) ? 0.15 : (grade === 1) ? -0.15 : 0;
-    c.ease = Math.max(1.3, c.ease);
-  }
-  
-  c.due = now + c.interval * 86400000; // ms
-  S.totalReviews++;
-  updateStreak();
-  
-  // Update mastery
-  const secId = cardId.split('::')[0];
-  if (!S.mastery[secId]) S.mastery[secId] = { seen: 0, correct: 0, total: 0, level: 0 };
-  S.mastery[secId].seen++;
-  S.mastery[secId].total++;
-  if (grade >= 2) S.mastery[secId].correct++;
-  S.mastery[secId].level = Math.min(3, Math.floor((S.mastery[secId].correct / Math.max(1, S.mastery[secId].total)) * 4));
-  
+function getCardState(id){if(!S.cards[id])S.cards[id]={interval:0,ease:2.5,due:0,reps:0,lapses:0};return S.cards[id]}
+function gradeCard(cardId,grade){
+  const c=getCardState(cardId),now=Date.now();
+  if(grade===0){c.reps=0;c.interval=1;c.lapses++;c.ease=Math.max(1.3,c.ease-0.2)}
+  else{if(c.reps===0)c.interval=1;else if(c.reps===1)c.interval=3;else c.interval=Math.round(c.interval*c.ease);c.reps++;c.ease+=grade===3?0.15:grade===1?-0.15:0;c.ease=Math.max(1.3,c.ease)}
+  c.due=now+c.interval*86400000;S.totalReviews++;updateStreak();
+  const secId=cardId.split('::')[0];
+  if(!S.mastery[secId])S.mastery[secId]={seen:0,correct:0,total:0,level:0};
+  S.mastery[secId].seen++;S.mastery[secId].total++;
+  if(grade>=2)S.mastery[secId].correct++;
+  S.mastery[secId].level=Math.min(3,Math.floor((S.mastery[secId].correct/Math.max(1,S.mastery[secId].total))*4));
   save();
 }
+function isDue(id){const c=S.cards[id];return !c||Date.now()>=c.due}
 
-function isDue(cardId) {
-  const c = S.cards[cardId];
-  if (!c) return true;
-  return Date.now() >= c.due;
-}
-
-// === BUILD ALL CARDS ===
-function buildAllCards() {
-  const cards = [];
-  for (const [secId, sec] of Object.entries(DATA)) {
-    // Q&A pairs (highest priority - these are the exam-style questions)
-    sec.qa_pairs.forEach((qa, i) => {
-      cards.push({
-        id: `${secId}::qa::${i}`,
-        type: 'question',
-        section: secId,
-        topic: sec.topic_num,
-        difficulty: qa.difficulty,
-        front: qa.question,
-        back: qa.answer,
-        sectionTitle: sec.title
-      });
-    });
-    // Commands
-    sec.commands.forEach((cmd, i) => {
-      if (cmd.command.length > 3 && cmd.context.length > 5) {
-        cards.push({
-          id: `${secId}::cmd::${i}`,
-          type: 'command',
-          section: secId,
-          topic: sec.topic_num,
-          difficulty: 'intermediate',
-          front: `What does this command do?\n\n$ ${cmd.command}`,
-          back: cmd.context,
-          sectionTitle: sec.title
-        });
-      }
-    });
-    // Concepts (filter out low-quality ones)
-    sec.concepts.forEach((c, i) => {
-      if (c.term.length > 3 && c.term.length < 35 && !c.term.match(/^(There|This|But|On|The|It|A |An )/i)) {
-        cards.push({
-          id: `${secId}::concept::${i}`,
-          type: 'concept',
-          section: secId,
-          topic: sec.topic_num,
-          difficulty: 'basic',
-          front: `What is: ${c.term}?`,
-          back: c.definition,
-          sectionTitle: sec.title
-        });
-      }
-    });
+function buildAllCards(){
+  const cards=[];
+  for(const[secId,sec]of Object.entries(DATA)){
+    sec.qa_pairs.forEach((qa,i)=>{cards.push({id:`${secId}::qa::${i}`,type:'question',section:secId,topic:sec.topic_num,difficulty:qa.difficulty,front:qa.question,back:qa.answer,sectionTitle:sec.title})});
+    sec.commands.forEach((cmd,i)=>{if(cmd.command.length>3&&cmd.context.length>5)cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`What does this command do?\n\n$ ${cmd.command}`,back:cmd.context,sectionTitle:sec.title})});
+    sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term))cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:`What is: ${c.term}?`,back:c.definition,sectionTitle:sec.title})});
   }
   return cards;
 }
+const ALL_CARDS=buildAllCards();
+function getDueCards(){return ALL_CARDS.filter(c=>isDue(c.id))}
+function getCardsBySection(secId){return ALL_CARDS.filter(c=>c.section===secId)}
 
-const ALL_CARDS = buildAllCards();
+const root=document.getElementById('root');
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-function getDueCards() {
-  return ALL_CARDS.filter(c => isDue(c.id));
-}
+// Track if we just graded (to show encouragement)
+let showEncouragement=false;
+let lastGrade=-1;
 
-function getCardsBySection(secId) {
-  return ALL_CARDS.filter(c => c.section === secId);
-}
-
-// === RENDERING ===
-const $ = id => document.getElementById(id);
-const root = document.getElementById('root');
-
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function render() {
-  let html = `
-    <div class="header">
-      <h1>🐧 LPI Linux Essentials 010</h1>
-      <p>Guided Discovery Study — Version 1.6 Exam</p>
-      ${S.streak > 0 ? `<div class="streak-badge">🔥 ${S.streak} day streak</div>` : ''}
-    </div>
-    <div class="nav" id="nav">
-      <button data-m="challenge" class="${S.mode==='challenge'?'active':''}">⚡ Challenge</button>
-      <button data-m="learn" class="${S.mode==='learn'?'active':''}">📖 Learn</button>
-      <button data-m="terminal" class="${S.mode==='terminal'?'active':''}">💻 Terminal</button>
-      <button data-m="flashcards" class="${S.mode==='flashcards'?'active':''}">🃏 Review</button>
-      <button data-m="progress" class="${S.mode==='progress'?'active':''}">📊 Progress</button>
-    </div>`;
-
-  switch(S.mode) {
-    case 'challenge': html += renderChallenge(); break;
-    case 'learn': html += renderLearn(); break;
-    case 'terminal': html += renderTerminal(); break;
-    case 'flashcards': html += renderFlashcards(); break;
-    case 'progress': html += renderProgress(); break;
+function render(){
+  let html=`<div class="header"><h1>🐧 Linux Essentials</h1>${S.streak>0?`<div class="streak">🔥 ${S.streak}</div>`:''}</div>
+  <div class="nav" id="nav">
+    <button data-m="challenge" class="${S.mode==='challenge'?'active':''}">⚡ Practice</button>
+    <button data-m="learn" class="${S.mode==='learn'?'active':''}">📖 Learn</button>
+    <button data-m="terminal" class="${S.mode==='terminal'?'active':''}">💻 Terminal</button>
+    <button data-m="flashcards" class="${S.mode==='flashcards'?'active':''}">🃏 Cards</button>
+    <button data-m="progress" class="${S.mode==='progress'?'active':''}">📊 Stats</button>
+  </div>`;
+  switch(S.mode){
+    case 'challenge':html+=renderChallenge();break;
+    case 'learn':html+=renderLearn();break;
+    case 'terminal':html+=renderTerminal();break;
+    case 'flashcards':html+=renderFlashcards();break;
+    case 'progress':html+=renderProgress();break;
   }
-  root.innerHTML = html;
+  root.innerHTML=html;
   bindEvents();
-  if (S.mode === 'terminal') bindTerminalEvents();
+  if(S.mode==='terminal')bindTerminalEvents();
 }
 
-function renderChallenge() {
-  if (S.currentSection) return renderSectionChallenge();
-  
-  const due = getDueCards();
-  let html = `<div class="panel" style="text-align:center;border-left:3px solid var(--accent)">
-    <p style="font-size:0.85rem;color:var(--muted)">Problem-first learning: test yourself before reading the explanation.</p>
-    <p style="margin-top:0.5rem;font-size:0.9rem"><strong style="color:var(--accent)">${due.length}</strong> cards due for review</p>
-  </div>`;
-  
-  html += renderPills();
-  html += `<div class="grid">`;
-  for (const [id, sec] of Object.entries(DATA)) {
-    if (S.topicFilter && sec.topic_num !== S.topicFilter) continue;
-    const m = S.mastery[id] || { level: 0, seen: 0, total: 0 };
-    const sectionDue = getCardsBySection(id).filter(c => isDue(c.id)).length;
-    const totalCards = getCardsBySection(id).length;
-    html += `<div class="sec-card" data-sec="${id}">
-      <h3>${id} ${sec.title}</h3>
-      <div class="meta">
-        <span>Topic ${sec.topic_num}</span>
-        <span>${sectionDue}/${totalCards} due</span>
-        <span class="diff diff-${sectionDue > 5 ? 'advanced' : sectionDue > 0 ? 'intermediate' : 'basic'}">${sectionDue > 0 ? 'Practice' : 'Mastered'}</span>
-      </div>
-      <div class="mastery mastery-${m.level}">${['—','◔','◑','✓'][m.level]}</div>
+function renderChallenge(){
+  if(showEncouragement&&lastGrade>=2){
+    const e=ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)];
+    showEncouragement=false;
+    setTimeout(()=>render(),1500);
+    return`<div class="encourage"><div class="big">${e.big}</div><h3>${e.h}</h3><p>${e.p}</p></div>`;
+  }
+  showEncouragement=false;
+
+  if(S.currentSection) return renderSectionChallenge();
+  const due=getDueCards();
+  let html=renderPills();
+  html+=`<div style="text-align:center;margin-bottom:1.2rem;color:var(--muted);font-size:0.85rem"><strong style="color:var(--primary)">${due.length}</strong> questions waiting for you</div>`;
+  html+=`<div class="grid">`;
+  for(const[id,sec]of Object.entries(DATA)){
+    if(S.topicFilter&&sec.topic_num!==S.topicFilter)continue;
+    const m=S.mastery[id]||{level:0};
+    const sectionDue=getCardsBySection(id).filter(c=>isDue(c.id)).length;
+    const totalCards=getCardsBySection(id).length;
+    const pct=totalCards?Math.round(((totalCards-sectionDue)/totalCards)*100):0;
+    const colors=['var(--card)','var(--amber-light)','var(--primary-light)','var(--green-light)'];
+    html+=`<div class="sec-card" data-sec="${id}">
+      <div class="icon" style="background:${colors[m.level]}">${['📘','📙','📕','✅'][m.level]}</div>
+      <div class="info"><h3>${sec.title}</h3><div class="meta">Topic ${sec.topic_num} · ${sectionDue} due</div></div>
+      <div class="ring ring-${m.level}">${pct}%</div>
     </div>`;
   }
-  html += `</div>`;
+  html+=`</div>`;
   return html;
 }
 
-function renderSectionChallenge() {
-  const sec = DATA[S.currentSection];
-  const cards = getCardsBySection(S.currentSection).filter(c => isDue(c.id));
-  const allCards = getCardsBySection(S.currentSection);
-  
-  if (cards.length === 0) {
-    return `<button class="back-btn" data-back>← Back</button>
-      <div class="panel" style="text-align:center">
-        <h2>✓ All caught up!</h2>
-        <p style="color:var(--muted);margin-top:0.5rem">All ${allCards.length} cards in this section are reviewed. Come back later for spaced repetition.</p>
-      </div>`;
+function renderSectionChallenge(){
+  const sec=DATA[S.currentSection];
+  const cards=getCardsBySection(S.currentSection).filter(c=>isDue(c.id));
+  const allCards=getCardsBySection(S.currentSection);
+  const done=allCards.length-cards.length;
+  const pct=allCards.length?Math.round((done/allCards.length)*100):100;
+
+  if(cards.length===0){
+    return`<button class="back-btn" data-back>← Back</button>
+      <div class="encourage"><div class="big">🎉</div><h3>Section complete!</h3><p>All ${allCards.length} cards reviewed. Come back later for spaced review.</p></div>`;
   }
-  
-  const card = cards[0];
-  const cardState = getCardState(card.id);
-  const isNew = cardState.reps === 0;
-  
-  let html = `<button class="back-btn" data-back>← Back</button>
-    <div class="progress-bar"><div class="progress-fill pf-blue" style="width:${((allCards.length - cards.length) / allCards.length) * 100}%"></div></div>
-    <div class="challenge">
-      <span class="challenge-label">${isNew ? '🆕 New' : '🔄 Review'} — ${card.type}</span>
-      <span class="diff diff-${card.difficulty}" style="margin-left:0.5rem">${card.difficulty}</span>
-      <div class="challenge-q">${esc(card.front)}</div>
-      <button class="reveal-btn" id="hintBtn" style="margin-right:0.5rem">💡 Hint</button>
-      <button class="reveal-btn" id="revealBtn">Show Answer</button>
-      <div class="challenge-hint" id="hintBox">${getHint(card)}</div>
-      <div class="answer-section" id="answerBox">
-        <p style="white-space:pre-wrap;font-size:0.88rem;line-height:1.7">${esc(card.back)}</p>
-        <p style="margin-top:1rem;font-size:0.82rem;color:var(--muted)">How well did you know this?</p>
-        <div class="grade-btns">
-          <button class="grade-btn wrong" data-grade="0">❌ Wrong</button>
-          <button class="grade-btn hard" data-grade="1">😓 Hard</button>
-          <button class="grade-btn good" data-grade="2">👍 Good</button>
-          <button class="grade-btn easy" data-grade="3">⚡ Easy</button>
-        </div>
+  const card=cards[0];
+  const isNew=!S.cards[card.id]||S.cards[card.id].reps===0;
+
+  return`<button class="back-btn" data-back>← Back</button>
+    <div class="focus">
+      <div class="focus-progress"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span>${done}/${allCards.length}</span></div>
+      <div class="focus-label">${isNew?'🆕 New':'🔄 Review'} · ${card.type}</div>
+      <div class="focus-q">${esc(card.front)}</div>
+      <button class="btn btn-primary" id="revealBtn">Show Answer</button>
+      <button class="btn btn-outline btn-sm" id="hintBtn" style="margin-left:0.5rem">💡 Hint</button>
+      <div class="answer answer-hidden" id="hintBox" style="border-left-color:var(--amber);background:var(--amber-light);margin-top:1rem">${getHint(card)}</div>
+      <div class="answer answer-hidden" id="answerBox">${esc(card.back)}</div>
+      <div class="grades answer-hidden" id="gradeBox">
+        <div class="grade grade-0" data-grade="0"><span class="emoji">😵</span><span class="label">Missed</span></div>
+        <div class="grade grade-1" data-grade="1"><span class="emoji">😅</span><span class="label">Hard</span></div>
+        <div class="grade grade-2" data-grade="2"><span class="emoji">👍</span><span class="label">Good</span></div>
+        <div class="grade grade-3" data-grade="3"><span class="emoji">⚡</span><span class="label">Easy</span></div>
       </div>
-    </div>
-    <div style="text-align:center;color:var(--muted);font-size:0.75rem">${cards.length - 1} more cards remaining in this section</div>`;
-  return html;
+    </div>`;
 }
 
-function getHint(card) {
-  // Provide a contextual hint from the lesson
-  const sec = DATA[card.section];
-  if (!sec.explanations || sec.explanations.length === 0) {
-    const summary = sec.summary || '';
-    return esc(summary.substring(0, 200) + '...');
-  }
-  return esc(sec.explanations[0].substring(0, 250) + '...');
+function getHint(card){
+  const sec=DATA[card.section];
+  if(sec.explanations&&sec.explanations.length>0)return esc(sec.explanations[0].substring(0,250)+'...');
+  const summary=sec.summary||'';
+  return esc(summary.substring(0,200)+'...');
 }
 
-function renderLearn() {
-  if (S.currentSection) return renderSectionLearn();
-  
-  let html = renderPills();
-  html += `<div class="grid">`;
-  for (const [id, sec] of Object.entries(DATA)) {
-    if (S.topicFilter && sec.topic_num !== S.topicFilter) continue;
-    const m = S.mastery[id] || { level: 0 };
-    html += `<div class="sec-card" data-sec="${id}">
-      <h3>${id} ${sec.title}</h3>
-      <div class="meta"><span>Topic ${sec.topic_num}: ${sec.topic}</span></div>
-      <div class="mastery mastery-${m.level}">${['—','◔','◑','✓'][m.level]}</div>
+function renderLearn(){
+  if(S.currentSection)return renderSectionLearn();
+  let html=renderPills()+`<div class="grid">`;
+  for(const[id,sec]of Object.entries(DATA)){
+    if(S.topicFilter&&sec.topic_num!==S.topicFilter)continue;
+    const m=S.mastery[id]||{level:0};
+    const colors=['var(--card)','var(--amber-light)','var(--primary-light)','var(--green-light)'];
+    html+=`<div class="sec-card" data-sec="${id}">
+      <div class="icon" style="background:${colors[m.level]}">📖</div>
+      <div class="info"><h3>${sec.title}</h3><div class="meta">Topic ${sec.topic_num}: ${sec.topic}</div></div>
     </div>`;
   }
-  html += `</div>`;
-  return html;
+  return html+`</div>`;
 }
 
-function renderSectionLearn() {
-  const sec = DATA[S.currentSection];
-  const tab = S.sectionTab || 'lesson';
-  
-  let html = `<button class="back-btn" data-back>← Back</button>
-    <div class="panel">
-      <h2>${S.currentSection} — ${sec.title}</h2>
-      <div class="tabs">
-        <button data-tab="lesson" class="${tab==='lesson'?'active':''}">📖 Lesson</button>
-        <button data-tab="concepts" class="${tab==='concepts'?'active':''}">💡 Key Concepts</button>
-        <button data-tab="commands" class="${tab==='commands'?'active':''}">⌨️ Commands</button>
-        <button data-tab="exercises" class="${tab==='exercises'?'active':''}">✍️ Exercises</button>
-      </div>`;
-  
-  if (tab === 'lesson') {
-    html += `<div class="lesson-text">${esc(sec.full_lesson || sec.lesson_excerpt)}</div>`;
-  } else if (tab === 'concepts') {
-    html += `<div style="display:grid;gap:0.6rem">`;
-    sec.concepts.forEach(c => {
-      if (c.term.length > 3 && c.term.length < 35 && !c.term.match(/^(There|This|But|On|The|It|A |An )/i)) {
-        html += `<div style="background:var(--card);padding:0.8rem 1rem;border-radius:6px;border-left:3px solid var(--accent2)">
-          <strong style="color:var(--accent2)">${esc(c.term)}</strong>
-          <p style="font-size:0.85rem;margin-top:0.3rem;color:var(--muted)">${esc(c.definition)}</p>
-        </div>`;
-      }
-    });
-    if (sec.concepts.filter(c => c.term.length > 3 && c.term.length < 35 && !c.term.match(/^(There|This|But|On|The|It|A |An )/i)).length === 0) {
-      html += `<p style="color:var(--muted)">See the lesson text for key concepts in this section.</p>`;
-    }
-    html += `</div>`;
-  } else if (tab === 'commands') {
-    if (sec.commands.length === 0) {
-      html += `<p style="color:var(--muted)">No command-line examples in this section.</p>`;
-    } else {
-      html += `<div style="display:grid;gap:0.5rem">`;
-      sec.commands.forEach(cmd => {
-        html += `<div style="background:var(--card);padding:0.7rem 1rem;border-radius:6px;font-family:monospace">
-          <code style="color:var(--green)">$ ${esc(cmd.command)}</code>
-          <p style="font-size:0.8rem;color:var(--muted);margin-top:0.2rem">${esc(cmd.context)}</p>
-        </div>`;
-      });
-      html += `</div>`;
-    }
-  } else if (tab === 'exercises') {
-    sec.qa_pairs.forEach((qa, i) => {
-      html += `<div style="margin-bottom:1.2rem;padding:1rem;background:var(--card);border-radius:6px">
-        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem">
-          <strong style="color:var(--text)">Q${i+1}.</strong>
-          <span class="diff diff-${qa.difficulty}">${qa.difficulty}</span>
-        </div>
-        <p style="font-size:0.88rem;white-space:pre-wrap;margin-bottom:0.8rem">${esc(qa.question)}</p>
-        <button class="reveal-btn" onclick="this.nextElementSibling.classList.toggle('show');this.textContent=this.textContent==='Show Answer'?'Hide':'Show Answer'">Show Answer</button>
-        <div class="answer-section"><p style="white-space:pre-wrap;font-size:0.85rem">${esc(qa.answer)}</p></div>
-      </div>`;
-    });
+function renderSectionLearn(){
+  const sec=DATA[S.currentSection];
+  const tab=S.sectionTab||'lesson';
+  let html=`<button class="back-btn" data-back>← Back</button><div class="panel"><h2>${S.currentSection} — ${sec.title}</h2>
+    <div class="tabs">
+      <button data-tab="lesson" class="${tab==='lesson'?'active':''}">Lesson</button>
+      <button data-tab="concepts" class="${tab==='concepts'?'active':''}">Concepts</button>
+      <button data-tab="commands" class="${tab==='commands'?'active':''}">Commands</button>
+      <button data-tab="exercises" class="${tab==='exercises'?'active':''}">Exercises</button>
+    </div>`;
+  if(tab==='lesson'){
+    html+=`<div class="lesson-text">${esc(sec.full_lesson||sec.lesson_excerpt)}</div>`;
+  }else if(tab==='concepts'){
+    const valid=sec.concepts.filter(c=>c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term));
+    if(valid.length===0)html+=`<p style="color:var(--muted)">See lesson text for concepts.</p>`;
+    else valid.forEach(c=>{html+=`<div style="background:var(--card);padding:0.8rem 1rem;border-radius:8px;margin-bottom:0.5rem;border-left:3px solid var(--primary)"><strong style="color:var(--primary)">${esc(c.term)}</strong><p style="font-size:0.84rem;margin-top:0.2rem;color:var(--muted)">${esc(c.definition)}</p></div>`});
+  }else if(tab==='commands'){
+    if(!sec.commands.length)html+=`<p style="color:var(--muted)">No commands in this section.</p>`;
+    else sec.commands.forEach(cmd=>{html+=`<div style="background:#1e1e2e;padding:0.6rem 1rem;border-radius:8px;margin-bottom:0.4rem;font-family:monospace"><code style="color:#a6e3a1">$ ${esc(cmd.command)}</code><p style="font-size:0.78rem;color:#a6adc8;margin-top:0.2rem">${esc(cmd.context)}</p></div>`});
+  }else if(tab==='exercises'){
+    sec.qa_pairs.forEach((qa,i)=>{html+=`<div style="background:var(--card);padding:1rem;border-radius:8px;margin-bottom:0.8rem"><p style="font-size:0.88rem;white-space:pre-wrap;word-break:break-word;margin-bottom:0.8rem"><strong>Q${i+1}.</strong> ${esc(qa.question)}</p><button class="btn btn-outline btn-sm" onclick="this.nextElementSibling.classList.toggle('answer-hidden')">Show Answer</button><div class="answer answer-hidden" style="margin-top:0.8rem">${esc(qa.answer)}</div></div>`});
   }
-  
-  html += `</div>`;
-  return html;
+  return html+`</div>`;
 }
 
-function renderFlashcards() {
-  let filtered = ALL_CARDS;
-  if (S.topicFilter) filtered = filtered.filter(c => c.topic === S.topicFilter);
-  if (S.fcFilter === 'due') filtered = filtered.filter(c => isDue(c.id));
-  
-  let html = renderPills();
-  html += `<div class="pills" style="margin-top:0.5rem">
-    <button class="${S.fcFilter==='due'?'active':''}" data-filter="due">Due (${getDueCards().length})</button>
-    <button class="${S.fcFilter==='all'?'active':''}" data-filter="all">All (${ALL_CARDS.length})</button>
-    <button class="${S.fcFilter==='new'?'active':''}" data-filter="new">New</button>
-  </div>`;
-  
-  if (filtered.length === 0) {
-    html += `<div class="panel" style="text-align:center"><h2>🎉 All caught up!</h2><p style="color:var(--muted)">No cards due. Come back later or switch to "All" view.</p></div>`;
-    return html;
-  }
-  
-  const idx = S.fcIdx % filtered.length;
-  const card = filtered[idx];
-  
-  html += `<div class="fc-container">
-    <div class="fc ${S.fcFlipped ? 'flipped' : ''}" id="flashcard">
-      <div class="fc-face fc-front">
-        <span class="fc-type">${card.type} — ${card.sectionTitle}</span>
-        <h3>${esc(card.front)}</h3>
-      </div>
-      <div class="fc-face fc-back">
-        <span class="fc-type">Answer</span>
-        <p>${esc(card.back)}</p>
-      </div>
-    </div>
-  </div>
-  <p class="fc-hint">Click to flip • Arrow keys to navigate • Space to flip</p>
-  <div class="fc-nav">
-    <button data-fc="prev">◀</button>
-    <span class="fc-counter">${idx + 1} / ${filtered.length}</span>
-    <button data-fc="next">▶</button>
-    <button data-fc="shuffle">🔀</button>
-  </div>`;
-  
-  if (S.fcFlipped) {
-    html += `<div class="grade-btns" style="justify-content:center;margin-top:1rem">
-      <button class="grade-btn wrong" data-grade="0" data-card="${card.id}">❌</button>
-      <button class="grade-btn hard" data-grade="1" data-card="${card.id}">😓</button>
-      <button class="grade-btn good" data-grade="2" data-card="${card.id}">👍</button>
-      <button class="grade-btn easy" data-grade="3" data-card="${card.id}">⚡</button>
+function renderFlashcards(){
+  let filtered=ALL_CARDS;
+  if(S.topicFilter)filtered=filtered.filter(c=>c.topic===S.topicFilter);
+  if(S.fcFilter==='due')filtered=filtered.filter(c=>isDue(c.id));
+  else if(S.fcFilter==='new')filtered=filtered.filter(c=>!S.cards[c.id]);
+
+  let html=renderPills();
+  html+=`<div class="pills" style="margin-top:0.5rem"><button class="${S.fcFilter==='due'?'active':''}" data-filter="due">Due (${getDueCards().length})</button><button class="${S.fcFilter==='all'?'active':''}" data-filter="all">All</button><button class="${S.fcFilter==='new'?'active':''}" data-filter="new">New</button></div>`;
+
+  if(!filtered.length)return html+`<div class="encourage"><div class="big">🎉</div><h3>All caught up!</h3><p>No cards due right now.</p></div>`;
+
+  const idx=S.fcIdx%filtered.length;const card=filtered[idx];
+  html+=`<div class="fc-wrap"><div class="fc ${S.fcFlipped?'flipped':''}" id="flashcard">
+    <div class="fc-face fc-front"><span class="fc-type">${card.type} · ${card.sectionTitle}</span><h3>${esc(card.front)}</h3></div>
+    <div class="fc-face fc-back"><span class="fc-type">Answer</span><p>${esc(card.back)}</p></div>
+  </div></div>
+  <p class="fc-hint">Tap to flip · Arrow keys to navigate</p>
+  <div class="fc-nav"><button data-fc="prev">←</button><span style="color:var(--muted);font-size:0.8rem">${idx+1}/${filtered.length}</span><button data-fc="next">→</button><button data-fc="shuffle">🔀</button></div>`;
+  if(S.fcFlipped){
+    html+=`<div class="grades" style="margin-top:1rem">
+      <div class="grade grade-0" data-grade="0" data-card="${card.id}"><span class="emoji">😵</span><span class="label">Missed</span></div>
+      <div class="grade grade-1" data-grade="1" data-card="${card.id}"><span class="emoji">😅</span><span class="label">Hard</span></div>
+      <div class="grade grade-2" data-grade="2" data-card="${card.id}"><span class="emoji">👍</span><span class="label">Good</span></div>
+      <div class="grade grade-3" data-grade="3" data-card="${card.id}"><span class="emoji">⚡</span><span class="label">Easy</span></div>
     </div>`;
   }
   return html;
 }
 
-function renderProgress() {
-  const total = ALL_CARDS.length;
-  const reviewed = Object.keys(S.cards).length;
-  const mastered = Object.values(S.cards).filter(c => c.reps >= 3).length;
-  const due = getDueCards().length;
-  
-  let html = `<div class="stats">
-    <div class="stat"><div class="n">${S.totalReviews}</div><div class="l">Total Reviews</div></div>
-    <div class="stat"><div class="n">${reviewed}</div><div class="l">Cards Seen</div></div>
+function renderProgress(){
+  const total=ALL_CARDS.length,reviewed=Object.keys(S.cards).length;
+  const mastered=Object.values(S.cards).filter(c=>c.reps>=3).length;
+  const due=getDueCards().length;
+  let html=`<div class="stats">
+    <div class="stat"><div class="n">${S.totalReviews}</div><div class="l">Reviews</div></div>
+    <div class="stat"><div class="n">${reviewed}/${total}</div><div class="l">Cards Seen</div></div>
     <div class="stat"><div class="n">${mastered}</div><div class="l">Mastered</div></div>
-    <div class="stat"><div class="n">${due}</div><div class="l">Due Today</div></div>
-    <div class="stat"><div class="n" style="color:var(--amber)">${S.streak}🔥</div><div class="l">Day Streak</div></div>
+    <div class="stat"><div class="n">${due}</div><div class="l">Due</div></div>
   </div>
-  <div class="progress-bar" style="height:8px;margin:1rem 0"><div class="progress-fill pf-green" style="width:${(reviewed/total)*100}%"></div></div>
-  <p style="text-align:center;color:var(--muted);font-size:0.8rem">${reviewed}/${total} cards studied (${Math.round((reviewed/total)*100)}%)</p>
-  <div class="panel" style="margin-top:1rem"><h2>Mastery by Section</h2>`;
-  
-  for (const [num, name] of Object.entries(TOPICS)) {
-    const secs = Object.entries(DATA).filter(([,s]) => s.topic_num === num);
-    html += `<div style="margin:1rem 0 0.3rem"><strong style="color:var(--accent2);font-size:0.85rem">Topic ${num}: ${name}</strong></div>`;
-    secs.forEach(([id, sec]) => {
-      const m = S.mastery[id] || { level: 0, seen: 0, correct: 0, total: 0 };
-      const cards = getCardsBySection(id);
-      const pct = cards.length > 0 ? Math.round((cards.filter(c => !isDue(c.id)).length / cards.length) * 100) : 0;
-      html += `<div style="display:flex;align-items:center;gap:0.5rem;margin:0.4rem 0;font-size:0.82rem">
-        <span class="mastery mastery-${m.level}" style="position:static;transform:none;width:24px;height:24px;font-size:0.6rem">${['—','◔','◑','✓'][m.level]}</span>
-        <span style="flex:1">${id} ${sec.title}</span>
-        <span style="color:var(--muted);min-width:40px;text-align:right">${pct}%</span>
-      </div>`;
+  <div class="progress-bar" style="margin-bottom:1.5rem"><div class="progress-fill pf-primary" style="width:${(reviewed/total)*100}%"></div></div>`;
+
+  for(const[num,name]of Object.entries(TOPICS)){
+    html+=`<div style="margin-bottom:1rem"><div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">Topic ${num}: ${name}</div>`;
+    Object.entries(DATA).filter(([,s])=>s.topic_num===num).forEach(([id,sec])=>{
+      const m=S.mastery[id]||{level:0};
+      const cards=getCardsBySection(id);
+      const pct=cards.length?Math.round((cards.filter(c=>!isDue(c.id)).length/cards.length)*100):0;
+      html+=`<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;font-size:0.82rem">
+        <span>${['⬜','🟨','🟦','🟩'][m.level]}</span><span style="flex:1">${sec.title}</span><span style="color:var(--muted)">${pct}%</span></div>`;
     });
+    html+=`</div>`;
   }
-  
-  html += `<button onclick="if(confirm('Reset all progress?')){localStorage.removeItem('${STORAGE_KEY}');location.reload()}" style="margin-top:1.5rem;background:var(--accent);border:none;color:#fff;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;font-size:0.8rem">Reset All Progress</button></div>`;
+  html+=`<button class="btn btn-outline btn-sm" onclick="if(confirm('Reset all progress?')){localStorage.removeItem('${STORAGE_KEY}');location.reload()}">Reset Progress</button>`;
   return html;
 }
 
-function renderPills() {
-  let html = `<div class="pills">
-    <button class="${!S.topicFilter?'active':''}" data-topic="">All</button>`;
-  for (const [num, name] of Object.entries(TOPICS)) {
-    html += `<button class="${S.topicFilter===num?'active':''}" data-topic="${num}">T${num}</button>`;
-  }
-  html += `</div>`;
-  return html;
+function renderPills(){
+  let h=`<div class="pills"><button class="${!S.topicFilter?'active':''}" data-topic="">All</button>`;
+  for(const[num,name]of Object.entries(TOPICS))h+=`<button class="${S.topicFilter===num?'active':''}" data-topic="${num}">T${num}</button>`;
+  return h+`</div>`;
 }
 
-// === EVENT HANDLING ===
-function bindEvents() {
-  // Nav
-  document.querySelectorAll('[data-m]').forEach(btn => {
-    btn.onclick = () => { S.mode = btn.dataset.m; S.currentSection = null; save(); render(); };
-  });
-  // Topic filter
-  document.querySelectorAll('[data-topic]').forEach(btn => {
-    btn.onclick = () => { S.topicFilter = btn.dataset.topic || null; S.fcIdx = 0; save(); render(); };
-  });
-  // Section cards
-  document.querySelectorAll('[data-sec]').forEach(el => {
-    el.onclick = () => { S.currentSection = el.dataset.sec; save(); render(); };
-  });
-  // Back
-  document.querySelectorAll('[data-back]').forEach(el => {
-    el.onclick = () => { S.currentSection = null; save(); render(); };
-  });
-  // Tabs
-  document.querySelectorAll('[data-tab]').forEach(btn => {
-    btn.onclick = () => { S.sectionTab = btn.dataset.tab; save(); render(); };
-  });
-  // Reveal answer in challenge
-  const revealBtn = document.getElementById('revealBtn');
-  if (revealBtn) revealBtn.onclick = () => document.getElementById('answerBox').classList.add('show');
-  const hintBtn = document.getElementById('hintBtn');
-  if (hintBtn) hintBtn.onclick = () => document.getElementById('hintBox').classList.toggle('show');
-  // Grade buttons in challenge mode
-  document.querySelectorAll('.grade-btn[data-grade]').forEach(btn => {
-    btn.onclick = () => {
-      const grade = parseInt(btn.dataset.grade);
-      const cardId = btn.dataset.card;
-      if (cardId) {
-        // Flashcard mode grading
-        gradeCard(cardId, grade);
-        S.fcIdx++;
-        S.fcFlipped = false;
-      } else {
-        // Challenge mode - grade first due card
-        const cards = getCardsBySection(S.currentSection).filter(c => isDue(c.id));
-        if (cards.length > 0) gradeCard(cards[0].id, grade);
-      }
-      save();
-      render();
-    };
-  });
-  // Flashcard interactions
-  const fc = document.getElementById('flashcard');
-  if (fc) fc.onclick = () => { S.fcFlipped = !S.fcFlipped; save(); render(); };
-  document.querySelectorAll('[data-fc]').forEach(btn => {
-    btn.onclick = () => {
-      if (btn.dataset.fc === 'prev') S.fcIdx = Math.max(0, S.fcIdx - 1);
-      else if (btn.dataset.fc === 'next') S.fcIdx++;
-      else if (btn.dataset.fc === 'shuffle') S.fcIdx = Math.floor(Math.random() * ALL_CARDS.length);
-      S.fcFlipped = false;
-      save();
-      render();
-    };
-  });
-  // Filter buttons for flashcards
-  document.querySelectorAll('[data-filter]').forEach(btn => {
-    btn.onclick = () => {
-      S.fcFilter = btn.dataset.filter;
-      S.fcIdx = 0;
-      S.fcFlipped = false;
-      if (S.fcFilter === 'new') {
-        // Show only unseen cards
-      }
-      save();
-      render();
-    };
-  });
-}
-
-// Keyboard navigation
-document.addEventListener('keydown', e => {
-  if (S.mode === 'flashcards') {
-    if (e.key === 'ArrowRight') { S.fcIdx++; S.fcFlipped = false; save(); render(); }
-    else if (e.key === 'ArrowLeft') { S.fcIdx = Math.max(0, S.fcIdx - 1); S.fcFlipped = false; save(); render(); }
-    else if (e.key === ' ') { e.preventDefault(); S.fcFlipped = !S.fcFlipped; save(); render(); }
-  }
-  if (S.mode === 'challenge' && S.currentSection) {
-    if (e.key === ' ') { e.preventDefault(); const ab = document.getElementById('answerBox'); if (ab) ab.classList.add('show'); }
-  }
-});
-
-// === PRACTICE TERMINAL ===
-const TERM_LABS = [
-  { id: 'nav', title: 'Filesystem Navigation', section: '2.3', tasks: [
-    { desc: 'Print your current working directory', check: c => c === 'pwd', hint: 'Use the pwd command' },
-    { desc: 'List files in the current directory', check: c => /^ls(\s|$)/.test(c) && !/\//.test(c), hint: 'Just type ls' },
-    { desc: 'Change to the /etc directory', check: c => c === 'cd /etc' || c === 'cd  /etc', hint: 'cd /etc' },
-    { desc: 'List all files including hidden ones', check: c => /^ls\s+.*-.*a/.test(c) || /^ls\s+-a/.test(c), hint: 'Use ls -a or ls -la' },
-    { desc: 'Go back to your home directory', check: c => c === 'cd ~' || c === 'cd' || c === 'cd $HOME', hint: 'cd ~ or just cd' },
+// === TERMINAL ===
+const TERM_LABS=[
+  {id:'nav',title:'Filesystem Navigation',section:'2.3',tasks:[
+    {desc:'Print your current working directory',check:c=>c==='pwd',hint:'pwd'},
+    {desc:'List files in the current directory',check:c=>/^ls(\s|$)/.test(c)&&!/\//.test(c),hint:'ls'},
+    {desc:'Change to the /etc directory',check:c=>c==='cd /etc'||c==='cd  /etc',hint:'cd /etc'},
+    {desc:'List all files including hidden ones',check:c=>/^ls\s+.*-.*a/.test(c)||/^ls\s+-a/.test(c),hint:'ls -a'},
+    {desc:'Go back to your home directory',check:c=>c==='cd ~'||c==='cd'||c==='cd $HOME',hint:'cd ~ or just cd'},
   ]},
-  { id: 'files', title: 'Creating & Managing Files', section: '2.4', tasks: [
-    { desc: 'Create a directory called "practice"', check: c => /^mkdir\s+practice$/.test(c), hint: 'mkdir practice' },
-    { desc: 'Create an empty file called "notes.txt"', check: c => /^touch\s+notes\.txt$/.test(c), hint: 'touch notes.txt' },
-    { desc: 'Copy notes.txt to notes_backup.txt', check: c => /^cp\s+notes\.txt\s+notes_backup\.txt$/.test(c), hint: 'cp notes.txt notes_backup.txt' },
-    { desc: 'Move notes_backup.txt into the practice directory', check: c => /^mv\s+notes_backup\.txt\s+practice(\/)?$/.test(c), hint: 'mv notes_backup.txt practice/' },
-    { desc: 'Remove the practice directory and its contents', check: c => /^rm\s+-r(f)?\s+practice$/.test(c) || /^rmdir\s+practice/.test(c), hint: 'rm -r practice' },
+  {id:'files',title:'Creating & Managing Files',section:'2.4',tasks:[
+    {desc:'Create a directory called "practice"',check:c=>/^mkdir\s+practice$/.test(c),hint:'mkdir practice'},
+    {desc:'Create an empty file called "notes.txt"',check:c=>/^touch\s+notes\.txt$/.test(c),hint:'touch notes.txt'},
+    {desc:'Copy notes.txt to notes_backup.txt',check:c=>/^cp\s+notes\.txt\s+notes_backup\.txt$/.test(c),hint:'cp notes.txt notes_backup.txt'},
+    {desc:'Move notes_backup.txt into practice/',check:c=>/^mv\s+notes_backup\.txt\s+practice(\/)?$/.test(c),hint:'mv notes_backup.txt practice/'},
+    {desc:'Remove the practice directory',check:c=>/^rm\s+-r(f)?\s+practice$/.test(c),hint:'rm -r practice'},
   ]},
-  { id: 'perms', title: 'File Permissions', section: '5.3', tasks: [
-    { desc: 'View permissions of all files in detail', check: c => /^ls\s+-l/.test(c), hint: 'ls -l' },
-    { desc: 'Make a file "script.sh" executable for the owner', check: c => /^chmod\s+(u\+x|7[0-9]{2}|[0-9]*[1357][0-9]{2})\s+script\.sh$/.test(c) || /^chmod\s+\+x\s+script\.sh$/.test(c), hint: 'chmod u+x script.sh or chmod +x script.sh' },
-    { desc: 'Change permissions of data.txt to read-only for everyone (444)', check: c => /^chmod\s+(444|a=r|u=r,g=r,o=r)\s+data\.txt$/.test(c), hint: 'chmod 444 data.txt' },
-    { desc: 'View the owner and group of /etc/passwd', check: c => /^ls\s+-l\s+\/etc\/passwd$/.test(c) || /^stat\s+\/etc\/passwd$/.test(c), hint: 'ls -l /etc/passwd' },
+  {id:'perms',title:'File Permissions',section:'5.3',tasks:[
+    {desc:'View detailed file permissions',check:c=>/^ls\s+-l/.test(c),hint:'ls -l'},
+    {desc:'Make script.sh executable',check:c=>/^chmod\s+(\+x|u\+x|7[0-9]{2})\s+script\.sh$/.test(c),hint:'chmod +x script.sh'},
+    {desc:'Set data.txt to read-only (444)',check:c=>/^chmod\s+444\s+data\.txt$/.test(c),hint:'chmod 444 data.txt'},
+    {desc:'View owner of /etc/passwd',check:c=>/^ls\s+-l\s+\/etc\/passwd$/.test(c)||/^stat/.test(c),hint:'ls -l /etc/passwd'},
   ]},
-  { id: 'archive', title: 'Archiving & Compression', section: '3.1', tasks: [
-    { desc: 'Create a tar archive called backup.tar from the docs/ directory', check: c => /^tar\s+(-c|c).*f\s+backup\.tar\s+docs/.test(c) || /^tar\s+cf\s+backup\.tar\s+docs/.test(c), hint: 'tar cf backup.tar docs/' },
-    { desc: 'List the contents of backup.tar without extracting', check: c => /^tar\s+(-t|t).*f\s+backup\.tar/.test(c) || /^tar\s+tf\s+backup\.tar/.test(c), hint: 'tar tf backup.tar' },
-    { desc: 'Compress backup.tar using gzip', check: c => /^gzip\s+backup\.tar$/.test(c), hint: 'gzip backup.tar' },
-    { desc: 'Extract a gzipped tar archive called backup.tar.gz', check: c => /^tar\s+(-x|x).*z.*f\s+backup\.tar\.gz/.test(c) || /^tar\s+xzf\s+backup\.tar\.gz/.test(c), hint: 'tar xzf backup.tar.gz' },
+  {id:'archive',title:'Archiving & Compression',section:'3.1',tasks:[
+    {desc:'Create backup.tar from docs/',check:c=>/^tar\s+.*c.*f\s+backup\.tar\s+docs/.test(c),hint:'tar cf backup.tar docs/'},
+    {desc:'List contents of backup.tar',check:c=>/^tar\s+.*t.*f\s+backup\.tar/.test(c),hint:'tar tf backup.tar'},
+    {desc:'Compress backup.tar with gzip',check:c=>/^gzip\s+backup\.tar$/.test(c),hint:'gzip backup.tar'},
+    {desc:'Extract backup.tar.gz',check:c=>/^tar\s+.*x.*z.*f\s+backup\.tar\.gz/.test(c),hint:'tar xzf backup.tar.gz'},
   ]},
-  { id: 'search', title: 'Searching & Filtering', section: '3.2', tasks: [
-    { desc: 'Search for the word "root" in /etc/passwd', check: c => /^grep\s+("root"|'root'|root)\s+\/etc\/passwd$/.test(c), hint: 'grep root /etc/passwd' },
-    { desc: 'Count the number of lines in /etc/passwd', check: c => /^wc\s+-l\s+\/etc\/passwd$/.test(c), hint: 'wc -l /etc/passwd' },
-    { desc: 'Display the first 5 lines of /etc/passwd', check: c => /^head\s+-n\s*5\s+\/etc\/passwd$/.test(c) || /^head\s+-5\s+\/etc\/passwd$/.test(c), hint: 'head -n 5 /etc/passwd' },
-    { desc: 'Find all .conf files in /etc', check: c => /^find\s+\/etc\s+.*-name\s+.*\.conf/.test(c), hint: 'find /etc -name "*.conf"' },
-    { desc: 'Pipe ls output to grep to find files with "log"', check: c => /^ls.*\|\s*grep\s+.*log/.test(c), hint: 'ls | grep log' },
+  {id:'search',title:'Searching & Filtering',section:'3.2',tasks:[
+    {desc:'Search for "root" in /etc/passwd',check:c=>/^grep\s+.*root.*\s+\/etc\/passwd$/.test(c),hint:'grep root /etc/passwd'},
+    {desc:'Count lines in /etc/passwd',check:c=>/^wc\s+-l\s+\/etc\/passwd$/.test(c),hint:'wc -l /etc/passwd'},
+    {desc:'Show first 5 lines of /etc/passwd',check:c=>/^head\s+(-n\s*5|-5)\s+\/etc\/passwd$/.test(c),hint:'head -n 5 /etc/passwd'},
+    {desc:'Find .conf files in /etc',check:c=>/^find\s+\/etc.*-name.*\.conf/.test(c),hint:'find /etc -name "*.conf"'},
+    {desc:'Pipe ls to grep for "log"',check:c=>/^ls.*\|\s*grep\s+.*log/.test(c),hint:'ls | grep log'},
   ]},
-  { id: 'scripting', title: 'Basic Scripting', section: '3.3', tasks: [
-    { desc: 'Display "Hello World" using echo', check: c => /^echo\s+("Hello World"|'Hello World'|Hello World)$/i.test(c) || /^echo\s+"Hello World"$/i.test(c), hint: 'echo "Hello World"' },
-    { desc: 'Create a variable called NAME with value "Linux"', check: c => /^NAME=("Linux"|'Linux'|Linux)$/.test(c), hint: 'NAME="Linux"' },
-    { desc: 'Print the value of the NAME variable', check: c => /^echo\s+\$NAME$/.test(c) || /^echo\s+\$\{NAME\}$/.test(c), hint: 'echo $NAME' },
-    { desc: 'Display the PATH environment variable', check: c => /^echo\s+\$PATH$/.test(c) || /^printenv\s+PATH$/.test(c) || /^env\s*\|\s*grep\s+PATH/.test(c), hint: 'echo $PATH' },
+  {id:'scripting',title:'Basic Scripting',section:'3.3',tasks:[
+    {desc:'Echo "Hello World"',check:c=>/^echo\s+("Hello World"|'Hello World'|Hello World)$/i.test(c),hint:'echo "Hello World"'},
+    {desc:'Create variable NAME="Linux"',check:c=>/^NAME=("Linux"|'Linux'|Linux)$/.test(c),hint:'NAME="Linux"'},
+    {desc:'Print the NAME variable',check:c=>/^echo\s+\$NAME$/.test(c),hint:'echo $NAME'},
+    {desc:'Display the PATH variable',check:c=>/^echo\s+\$PATH$/.test(c)||/^printenv\s+PATH$/.test(c),hint:'echo $PATH'},
   ]},
-  { id: 'users', title: 'Users & Groups', section: '5.1', tasks: [
-    { desc: 'Display the current username', check: c => c === 'whoami' || c === 'id -un', hint: 'whoami' },
-    { desc: 'List all groups the current user belongs to', check: c => c === 'groups' || c === 'id -Gn' || c === 'id', hint: 'groups or id' },
-    { desc: 'View the /etc/passwd file', check: c => /^cat\s+\/etc\/passwd$/.test(c) || /^less\s+\/etc\/passwd$/.test(c), hint: 'cat /etc/passwd' },
-    { desc: 'Check who is logged in', check: c => c === 'who' || c === 'w' || c === 'users', hint: 'who' },
+  {id:'users',title:'Users & Groups',section:'5.1',tasks:[
+    {desc:'Display current username',check:c=>c==='whoami',hint:'whoami'},
+    {desc:'List your groups',check:c=>c==='groups'||c==='id',hint:'groups'},
+    {desc:'View /etc/passwd',check:c=>/^cat\s+\/etc\/passwd$/.test(c),hint:'cat /etc/passwd'},
+    {desc:'Check who is logged in',check:c=>c==='who'||c==='w',hint:'who'},
   ]},
-  { id: 'network', title: 'Networking Basics', section: '4.4', tasks: [
-    { desc: 'Display network interface configuration', check: c => /^(ifconfig|ip\s+addr|ip\s+a)$/.test(c), hint: 'ip addr or ifconfig' },
-    { desc: 'Check connectivity to google.com with 3 packets', check: c => /^ping\s+(-c\s*3\s+)?google\.com/.test(c) && /(-c\s*3|count\s*3)/.test(c), hint: 'ping -c 3 google.com' },
-    { desc: 'Display the routing table', check: c => /^(route|ip\s+route|netstat\s+-r)/.test(c), hint: 'ip route or route' },
-    { desc: 'Look up DNS for google.com', check: c => /^(dig|nslookup|host)\s+google\.com$/.test(c), hint: 'dig google.com or host google.com' },
+  {id:'network',title:'Networking Basics',section:'4.4',tasks:[
+    {desc:'Show network interfaces',check:c=>/^(ifconfig|ip\s+a(ddr)?)$/.test(c),hint:'ip addr'},
+    {desc:'Ping google.com (3 packets)',check:c=>/^ping\s+-c\s*3\s+google\.com/.test(c),hint:'ping -c 3 google.com'},
+    {desc:'Show routing table',check:c=>/^(route|ip\s+route|netstat\s+-r)/.test(c),hint:'ip route'},
+    {desc:'DNS lookup for google.com',check:c=>/^(dig|nslookup|host)\s+google\.com$/.test(c),hint:'dig google.com'},
   ]},
-  { id: 'help', title: 'Getting Help', section: '2.2', tasks: [
-    { desc: 'View the manual page for the ls command', check: c => /^man\s+ls$/.test(c), hint: 'man ls' },
-    { desc: 'Get short help info for the cp command', check: c => /^cp\s+--help$/.test(c) || /^help\s+cp$/.test(c), hint: 'cp --help' },
-    { desc: 'Find what command "copy" might refer to using apropos', check: c => /^(apropos|man\s+-k)\s+copy$/.test(c), hint: 'apropos copy' },
-    { desc: 'Check the type of the cd command', check: c => /^type\s+cd$/.test(c), hint: 'type cd' },
+  {id:'help',title:'Getting Help',section:'2.2',tasks:[
+    {desc:'View man page for ls',check:c=>/^man\s+ls$/.test(c),hint:'man ls'},
+    {desc:'Get help for cp',check:c=>/^cp\s+--help$/.test(c),hint:'cp --help'},
+    {desc:'Use apropos to find "copy"',check:c=>/^(apropos|man\s+-k)\s+copy$/.test(c),hint:'apropos copy'},
+    {desc:'Check type of cd',check:c=>/^type\s+cd$/.test(c),hint:'type cd'},
   ]},
 ];
 
-// Virtual filesystem for realistic output
-const VFS = {
-  cwd: '/home/student',
-  home: '/home/student',
-  user: 'student',
-  files: {
-    '/home/student': { type: 'd', children: ['notes.txt', 'script.sh', 'data.txt', 'docs', '.bashrc', '.profile'] },
-    '/home/student/docs': { type: 'd', children: ['readme.md', 'report.pdf', 'log.txt'] },
-    '/home/student/notes.txt': { type: 'f', perms: '-rw-r--r--', owner: 'student', group: 'student', size: 1024 },
-    '/home/student/script.sh': { type: 'f', perms: '-rw-r--r--', owner: 'student', group: 'student', size: 256 },
-    '/home/student/data.txt': { type: 'f', perms: '-rw-rw-r--', owner: 'student', group: 'student', size: 4096 },
-    '/home/student/.bashrc': { type: 'f', perms: '-rw-r--r--', owner: 'student', group: 'student', size: 3771 },
-    '/home/student/.profile': { type: 'f', perms: '-rw-r--r--', owner: 'student', group: 'student', size: 807 },
-    '/etc': { type: 'd', children: ['passwd', 'hosts', 'hostname', 'resolv.conf', 'fstab', 'ssh'] },
-    '/etc/passwd': { type: 'f', perms: '-rw-r--r--', owner: 'root', group: 'root', size: 2847, content: 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nstudent:x:1000:1000:Student User:/home/student:/bin/bash' },
-    '/etc/hosts': { type: 'f', perms: '-rw-r--r--', owner: 'root', group: 'root', size: 221 },
-    '/etc/hostname': { type: 'f', perms: '-rw-r--r--', owner: 'root', group: 'root', size: 12, content: 'linux-lab' },
-  },
-  vars: { NAME: '', HOME: '/home/student', USER: 'student', PATH: '/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin', SHELL: '/bin/bash' }
+const VFS={cwd:'/home/student',home:'/home/student',user:'student',
+  files:{'/home/student':{type:'d',children:['notes.txt','script.sh','data.txt','docs','.bashrc','.profile']},'/home/student/docs':{type:'d',children:['readme.md','report.pdf','log.txt']},'/home/student/notes.txt':{type:'f',perms:'-rw-r--r--',owner:'student',group:'student',size:1024},'/home/student/script.sh':{type:'f',perms:'-rw-r--r--',owner:'student',group:'student',size:256},'/home/student/data.txt':{type:'f',perms:'-rw-rw-r--',owner:'student',group:'student',size:4096},'/home/student/.bashrc':{type:'f',perms:'-rw-r--r--',owner:'student',group:'student',size:3771},'/home/student/.profile':{type:'f',perms:'-rw-r--r--',owner:'student',group:'student',size:807},'/etc':{type:'d',children:['passwd','hosts','hostname','resolv.conf','fstab','ssh']},'/etc/passwd':{type:'f',perms:'-rw-r--r--',owner:'root',group:'root',size:2847,content:'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nstudent:x:1000:1000:Student User:/home/student:/bin/bash'},'/etc/hosts':{type:'f',perms:'-rw-r--r--',owner:'root',group:'root',size:221},'/etc/hostname':{type:'f',perms:'-rw-r--r--',owner:'root',group:'root',size:12,content:'linux-lab'}},
+  vars:{NAME:'',HOME:'/home/student',USER:'student',PATH:'/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',SHELL:'/bin/bash'}
 };
 
-let termHistory = [];
-let termHistIdx = -1;
-let termOutput = [{ type: 'output', text: 'Welcome to the LPI Practice Terminal!\nType commands to complete the tasks. Type "help" for available commands.\nType "reset" to restart the current lab.\n' }];
-let currentLab = null;
-let labProgress = JSON.parse(localStorage.getItem('lpi_term_progress') || '{}');
+let termHistory=[],termHistIdx=-1,termOutput=[{type:'output',text:'Welcome! Complete the tasks above using Linux commands.\nType "hint" for help · "reset" to restart · "clear" to clear\n'}],currentLab=null;
+let labProgress=JSON.parse(localStorage.getItem('lpi_term_progress')||'{}');
+function saveTermProgress(){localStorage.setItem('lpi_term_progress',JSON.stringify(labProgress))}
 
-function saveTermProgress() {
-  localStorage.setItem('lpi_term_progress', JSON.stringify(labProgress));
-}
-
-function execCommand(input) {
-  const cmd = input.trim();
-  if (!cmd) return;
-  termHistory.unshift(cmd);
-  termHistIdx = -1;
-  termOutput.push({ type: 'cmd', text: cmd });
-
-  // Check lab task completion
-  if (currentLab) {
-    const lab = TERM_LABS.find(l => l.id === currentLab);
-    if (lab) {
-      const progress = labProgress[lab.id] || [];
-      for (let i = 0; i < lab.tasks.length; i++) {
-        if (!progress.includes(i) && lab.tasks[i].check(cmd)) {
-          progress.push(i);
-          labProgress[lab.id] = progress;
-          saveTermProgress();
-          termOutput.push({ type: 'success', text: `✓ Task completed: ${lab.tasks[i].desc}` });
-          if (progress.length === lab.tasks.length) {
-            termOutput.push({ type: 'success', text: '\n🎉 Lab complete! All tasks finished.' });
-          }
-          break;
-        }
+function execCommand(input){
+  const cmd=input.trim();if(!cmd)return;
+  termHistory.unshift(cmd);termHistIdx=-1;
+  termOutput.push({type:'cmd',text:cmd});
+  if(currentLab){
+    const lab=TERM_LABS.find(l=>l.id===currentLab);
+    const progress=labProgress[lab.id]||[];
+    for(let i=0;i<lab.tasks.length;i++){
+      if(!progress.includes(i)&&lab.tasks[i].check(cmd)){
+        progress.push(i);labProgress[lab.id]=progress;saveTermProgress();
+        termOutput.push({type:'success',text:`✓ Task completed: ${lab.tasks[i].desc}`});
+        if(progress.length===lab.tasks.length)termOutput.push({type:'success',text:'\n🎉 Lab complete! All tasks done.'});
+        break;
       }
     }
   }
+  const output=simulateCommand(cmd);
+  if(output!==null)termOutput.push({type:output.startsWith('bash:')?'error':'output',text:output});
+}
 
-  // Simulate command output
-  const output = simulateCommand(cmd);
-  if (output !== null) {
-    termOutput.push({ type: output.startsWith('Error') || output.startsWith('bash:') ? 'error' : 'output', text: output });
+function simulateCommand(cmd){
+  const parts=cmd.split(/\s+/),base=parts[0];
+  switch(base){
+    case'pwd':return VFS.cwd;
+    case'whoami':return VFS.user;
+    case'hostname':return'linux-lab';
+    case'id':return parts[1]==='-un'?VFS.user:parts[1]==='-Gn'?'student sudo users':'uid=1000(student) gid=1000(student) groups=1000(student),27(sudo)';
+    case'who':return'student  pts/0  2026-06-05 10:00';
+    case'w':return' 14:00 up 2 days, 1 user\nUSER  TTY   FROM  LOGIN@  WHAT\nstudent pts/0 :0    10:00   bash';
+    case'users':return'student';
+    case'groups':return'student sudo users';
+    case'date':return new Date().toString();
+    case'uname':return parts.includes('-a')?'Linux linux-lab 5.15.0 x86_64 GNU/Linux':'Linux';
+    case'echo':{let t=parts.slice(1).join(' ').replace(/^["']|["']$/g,'');t=t.replace(/\$\{?(\w+)\}?/g,(_,v)=>VFS.vars[v]||'');return t}
+    case'cat':{const p=resolvePath(parts[1]),f=VFS.files[p];if(!f)return`cat: ${parts[1]}: No such file or directory`;if(f.type==='d')return`cat: ${parts[1]}: Is a directory`;return f.content||`[contents of ${parts[1]}]`}
+    case'ls':{let target=VFS.cwd,showAll=false,showLong=false;for(let i=1;i<parts.length;i++){if(parts[i].startsWith('-')){if(parts[i].includes('a'))showAll=true;if(parts[i].includes('l'))showLong=true}else target=resolvePath(parts[i])}const dir=VFS.files[target];if(!dir)return`ls: cannot access '${parts[parts.length-1]}': No such file or directory`;if(dir.type==='f'){return showLong?`${dir.perms} 1 ${dir.owner} ${dir.group} ${dir.size} Jun 5 10:00 ${target.split('/').pop()}`:target.split('/').pop()}let items=dir.children||[];if(showAll)items=['.','..', ...items];if(showLong)return items.map(n=>{if(n==='.'||n==='..')return`drwxr-xr-x 2 student student 4096 Jun 5 10:00 ${n}`;const fp=target+'/'+n,f=VFS.files[fp];return f?`${f.perms} 1 ${f.owner} ${f.group} ${f.size||4096} Jun 5 10:00 ${n}`:`drwxr-xr-x 2 student student 4096 Jun 5 10:00 ${n}`}).join('\n');return items.join('  ')}
+    case'cd':{const t=parts[1]||VFS.home;VFS.cwd=resolvePath(t==='~'?VFS.home:t);return null}
+    case'mkdir':{const n=parts[parts.length-1],p=resolvePath(n);VFS.files[p]={type:'d',children:[]};const par=VFS.cwd;if(VFS.files[par]&&VFS.files[par].children)VFS.files[par].children.push(n);return null}
+    case'touch':{const n=parts[1],p=resolvePath(n);VFS.files[p]={type:'f',perms:'-rw-r--r--',owner:VFS.user,group:VFS.user,size:0};const par=VFS.cwd;if(VFS.files[par]&&VFS.files[par].children&&!VFS.files[par].children.includes(n))VFS.files[par].children.push(n);return null}
+    case'cp':{const s=parts[1],d=parts[2];const sp=resolvePath(s);if(!VFS.files[sp])return`cp: cannot stat '${s}': No such file or directory`;VFS.files[resolvePath(d)]={...VFS.files[sp]};return null}
+    case'mv':{const s=parts[1],d=parts[2];const sp=resolvePath(s);if(!VFS.files[sp])return`mv: cannot stat '${s}': No such file or directory`;VFS.files[resolvePath(d)]=VFS.files[sp];delete VFS.files[sp];return null}
+    case'rm':{const target=parts.filter(p=>!p.startsWith('-'))[1];if(!target)return'rm: missing operand';const p=resolvePath(target);if(!VFS.files[p])return`rm: cannot remove '${target}': No such file or directory`;delete VFS.files[p];return null}
+    case'rmdir':{const p=resolvePath(parts[1]);delete VFS.files[p];return null}
+    case'chmod':case'chown':return null;
+    case'grep':{const pat=parts[1]?.replace(/['"]/g,''),file=parts[2];if(!file)return'Usage: grep PATTERN FILE';const p=resolvePath(file),f=VFS.files[p];if(!f)return`grep: ${file}: No such file or directory`;return f.content?f.content.split('\n').filter(l=>l.includes(pat)).join('\n'):`[matches for "${pat}"]`}
+    case'wc':{const file=parts[parts.length-1],p=resolvePath(file),f=VFS.files[p];if(!f)return`wc: ${file}: No such file or directory`;if(f.content){const l=f.content.split('\n').length;return parts.includes('-l')?`${l} ${file}`:`  ${l}  ${f.content.split(/\s+/).length} ${f.content.length} ${file}`}return parts.includes('-l')?`5 ${file}`:`  5  25 100 ${file}`}
+    case'head':{const n=parts.indexOf('-n')>-1?parseInt(parts[parts.indexOf('-n')+1]):parts[1]?.startsWith('-')?parseInt(parts[1].slice(1)):10;const file=parts[parts.length-1],p=resolvePath(file),f=VFS.files[p];if(!f)return`head: cannot open '${file}'`;return f.content?f.content.split('\n').slice(0,n).join('\n'):`[first ${n} lines]`}
+    case'tail':return`[last 10 lines of ${parts[parts.length-1]}]`;
+    case'find':return'/etc/resolv.conf\n/etc/ssh/sshd_config';
+    case'tar':case'gzip':case'gunzip':return null;
+    case'man':return`NAME\n    ${parts[1]} - manual page\n\nSYNOPSIS\n    ${parts[1]} [OPTION]... [FILE]...\n\n(press q to exit)`;
+    case'type':{const builtins=['cd','echo','exit','export','type'];return builtins.includes(parts[1])?`${parts[1]} is a shell builtin`:`${parts[1]} is /usr/bin/${parts[1]}`}
+    case'apropos':return'cp (1) - copy files and directories';
+    case'help':return'Commands: ls cd pwd cat cp mv rm mkdir rmdir touch chmod grep find\nwc head tail tar gzip echo man type whoami id groups ping ip\n\nLab: hint, reset, labs, clear';
+    case'hint':{if(!currentLab)return'Start a lab first.';const lab=TERM_LABS.find(l=>l.id===currentLab),pr=labProgress[lab.id]||[];const next=lab.tasks.findIndex((_,i)=>!pr.includes(i));return next>=0?`💡 ${lab.tasks[next].hint}`:'All done!'}
+    case'reset':{if(currentLab){labProgress[currentLab]=[];saveTermProgress();return'Lab reset.'}return'No active lab.'}
+    case'labs':return TERM_LABS.map((l,i)=>`${i+1}. ${l.title} (${(labProgress[l.id]||[]).length}/${l.tasks.length})`).join('\n');
+    case'clear':termOutput=[];return null;
+    case'ifconfig':return'eth0: inet 192.168.1.100  netmask 255.255.255.0';
+    case'ip':if(parts[1]==='addr'||parts[1]==='a')return'2: eth0: inet 192.168.1.100/24';if(parts[1]==='route')return'default via 192.168.1.1 dev eth0\n192.168.1.0/24 dev eth0';return'Usage: ip [addr|route]';
+    case'ping':return'PING google.com (142.250.80.46)\n64 bytes: icmp_seq=1 ttl=118 time=12ms\n64 bytes: icmp_seq=2 ttl=118 time=11ms\n64 bytes: icmp_seq=3 ttl=118 time=12ms\n--- 3 packets, 0% loss';
+    case'route':return'default  192.168.1.1  UG  eth0\n192.168.1.0/24  *  U  eth0';
+    case'dig':return`;; ANSWER:\n${parts[1]||'google.com'}. 300 IN A 142.250.80.46`;
+    case'nslookup':return`Name: ${parts[1]||'google.com'}\nAddress: 142.250.80.46`;
+    case'host':return`${parts[1]||'google.com'} has address 142.250.80.46`;
+    case'netstat':return'tcp 0 0 192.168.1.100:22 0.0.0.0:* LISTEN';
+    case'printenv':return parts[1]?(VFS.vars[parts[1]]||''):Object.entries(VFS.vars).map(([k,v])=>`${k}=${v}`).join('\n');
+    case'env':return Object.entries(VFS.vars).map(([k,v])=>`${k}=${v}`).join('\n');
+    case'export':{const m=cmd.match(/export\s+(\w+)=(.*)/);if(m)VFS.vars[m[1]]=m[2].replace(/['"]/g,'');return null}
+    case'stat':{const p=resolvePath(parts[1]),f=VFS.files[p];return f?`File: ${parts[1]}\nSize: ${f.size||4096}\nAccess: ${f.perms||'0644'}\nOwner: ${f.owner||VFS.user}`:`stat: cannot stat '${parts[1]}'`}
+    default:{const vm=cmd.match(/^(\w+)=(.*)$/);if(vm){VFS.vars[vm[1]]=vm[2].replace(/['"]/g,'');return null}if(cmd.includes('|'))return'[pipe output]';return`bash: ${base}: command not found`}
   }
 }
+function resolvePath(p){if(!p)return VFS.cwd;if(p.startsWith('~'))p=VFS.home+p.slice(1);if(p.startsWith('/'))return p.replace(/\/+$/,'')||'/';const parts=(VFS.cwd+'/'+p).split('/').filter(Boolean),stack=[];parts.forEach(x=>{if(x==='..')stack.pop();else if(x!=='.')stack.push(x)});return'/'+stack.join('/')}
 
-function simulateCommand(cmd) {
-  const parts = cmd.split(/\s+/);
-  const base = parts[0];
-
-  switch(base) {
-    case 'pwd': return VFS.cwd;
-    case 'whoami': return VFS.user;
-    case 'hostname': return 'linux-lab';
-    case 'id': {
-      if (parts[1] === '-un') return VFS.user;
-      if (parts[1] === '-Gn') return 'student sudo users';
-      return 'uid=1000(student) gid=1000(student) groups=1000(student),27(sudo),100(users)';
-    }
-    case 'who': return 'student  pts/0        2026-06-05 10:00 (:0)';
-    case 'w': return ' 14:00:00 up 2 days,  3:42,  1 user\nUSER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT\nstudent  pts/0    :0               10:00    0.00s  0.10s  0.01s bash';
-    case 'users': return 'student';
-    case 'groups': return 'student sudo users';
-    case 'date': return new Date().toString();
-    case 'uname': return parts.includes('-a') ? 'Linux linux-lab 5.15.0-generic #1 SMP x86_64 GNU/Linux' : 'Linux';
-    case 'echo': {
-      let text = parts.slice(1).join(' ').replace(/^["']|["']$/g, '');
-      // Variable substitution
-      text = text.replace(/\$\{?(\w+)\}?/g, (_, v) => VFS.vars[v] || '');
-      return text;
-    }
-    case 'cat': {
-      const path = resolvePath(parts[1]);
-      const file = VFS.files[path];
-      if (!file) return `cat: ${parts[1]}: No such file or directory`;
-      if (file.type === 'd') return `cat: ${parts[1]}: Is a directory`;
-      return file.content || `[contents of ${parts[1]}]`;
-    }
-    case 'ls': {
-      let target = VFS.cwd;
-      let showAll = false, showLong = false, showHuman = false;
-      for (let i = 1; i < parts.length; i++) {
-        if (parts[i].startsWith('-')) {
-          if (parts[i].includes('a')) showAll = true;
-          if (parts[i].includes('l')) showLong = true;
-          if (parts[i].includes('h')) showHuman = true;
-        } else {
-          target = resolvePath(parts[i]);
-        }
-      }
-      const dir = VFS.files[target];
-      if (!dir) return `ls: cannot access '${parts[parts.length-1]}': No such file or directory`;
-      if (dir.type === 'f') {
-        if (showLong) return `${dir.perms} 1 ${dir.owner} ${dir.group} ${dir.size} Jun  5 10:00 ${target.split('/').pop()}`;
-        return target.split('/').pop();
-      }
-      let items = dir.children || [];
-      if (showAll) items = ['.', '..', ...items];
-      if (showLong) {
-        return items.map(name => {
-          if (name === '.' || name === '..') return `drwxr-xr-x 2 ${VFS.user} ${VFS.user} 4096 Jun  5 10:00 ${name}`;
-          const fullPath = target + '/' + name;
-          const f = VFS.files[fullPath];
-          if (f) return `${f.perms} 1 ${f.owner} ${f.group} ${f.size || 4096} Jun  5 10:00 ${name}`;
-          return `drwxr-xr-x 2 ${VFS.user} ${VFS.user} 4096 Jun  5 10:00 ${name}`;
-        }).join('\n');
-      }
-      return items.join('  ');
-    }
-    case 'cd': {
-      const target = parts[1] || VFS.home;
-      const resolved = resolvePath(target === '~' ? VFS.home : target);
-      const dir = VFS.files[resolved];
-      if (!dir && !resolved.startsWith('/')) return `bash: cd: ${target}: No such file or directory`;
-      VFS.cwd = resolved;
-      return null;
-    }
-    case 'mkdir': {
-      const name = parts[parts.length - 1];
-      const path = resolvePath(name);
-      VFS.files[path] = { type: 'd', children: [] };
-      // Add to parent
-      const parent = path.substring(0, path.lastIndexOf('/')) || '/';
-      if (VFS.files[parent] && VFS.files[parent].children) VFS.files[parent].children.push(name);
-      return null;
-    }
-    case 'touch': {
-      const name = parts[1];
-      const path = resolvePath(name);
-      VFS.files[path] = { type: 'f', perms: '-rw-r--r--', owner: VFS.user, group: VFS.user, size: 0 };
-      const parent = VFS.cwd;
-      if (VFS.files[parent] && VFS.files[parent].children && !VFS.files[parent].children.includes(name)) {
-        VFS.files[parent].children.push(name);
-      }
-      return null;
-    }
-    case 'cp': {
-      const src = parts[1], dst = parts[parts.length - 1];
-      const srcPath = resolvePath(src);
-      if (!VFS.files[srcPath]) return `cp: cannot stat '${src}': No such file or directory`;
-      const dstPath = resolvePath(dst);
-      VFS.files[dstPath] = { ...VFS.files[srcPath] };
-      const parent = VFS.cwd;
-      if (VFS.files[parent] && VFS.files[parent].children) VFS.files[parent].children.push(dst);
-      return null;
-    }
-    case 'mv': {
-      const src = parts[1], dst = parts[2];
-      const srcPath = resolvePath(src);
-      if (!VFS.files[srcPath]) return `mv: cannot stat '${src}': No such file or directory`;
-      const dstPath = resolvePath(dst);
-      VFS.files[dstPath] = VFS.files[srcPath];
-      delete VFS.files[srcPath];
-      return null;
-    }
-    case 'rm': {
-      const flags = parts.filter(p => p.startsWith('-')).join('');
-      const target = parts.filter(p => !p.startsWith('-'))[1];
-      if (!target) return 'rm: missing operand';
-      const path = resolvePath(target);
-      if (!VFS.files[path]) return `rm: cannot remove '${target}': No such file or directory`;
-      delete VFS.files[path];
-      return null;
-    }
-    case 'rmdir': {
-      const target = parts[1];
-      const path = resolvePath(target);
-      if (!VFS.files[path]) return `rmdir: failed to remove '${target}': No such file or directory`;
-      delete VFS.files[path];
-      return null;
-    }
-    case 'chmod': return null;
-    case 'chown': return null;
-    case 'grep': {
-      const pattern = parts[1]?.replace(/['"]/g, '');
-      const file = parts[2];
-      if (!file) return 'Usage: grep PATTERN FILE';
-      const path = resolvePath(file);
-      const f = VFS.files[path];
-      if (!f) return `grep: ${file}: No such file or directory`;
-      if (f.content) {
-        return f.content.split('\n').filter(l => l.includes(pattern)).join('\n') || '';
-      }
-      return `[matching lines for "${pattern}" in ${file}]`;
-    }
-    case 'wc': {
-      const file = parts[parts.length - 1];
-      const path = resolvePath(file);
-      const f = VFS.files[path];
-      if (!f) return `wc: ${file}: No such file or directory`;
-      if (f.content) {
-        const lines = f.content.split('\n').length;
-        const words = f.content.split(/\s+/).length;
-        const chars = f.content.length;
-        if (parts.includes('-l')) return `${lines} ${file}`;
-        return `  ${lines}  ${words} ${chars} ${file}`;
-      }
-      if (parts.includes('-l')) return `5 ${file}`;
-      return `  5  25 ${f.size || 100} ${file}`;
-    }
-    case 'head': {
-      const nIdx = parts.indexOf('-n');
-      const n = nIdx > -1 ? parseInt(parts[nIdx + 1]) : (parts[1]?.startsWith('-') ? parseInt(parts[1].slice(1)) : 10);
-      const file = parts[parts.length - 1];
-      const path = resolvePath(file);
-      const f = VFS.files[path];
-      if (!f) return `head: cannot open '${file}': No such file or directory`;
-      if (f.content) return f.content.split('\n').slice(0, n).join('\n');
-      return `[first ${n} lines of ${file}]`;
-    }
-    case 'tail': {
-      const file = parts[parts.length - 1];
-      return `[last 10 lines of ${file}]`;
-    }
-    case 'find': return `/etc/resolv.conf\n/etc/ssh/sshd_config\n/etc/fstab`;
-    case 'tar': return null;
-    case 'gzip': return null;
-    case 'gunzip': return null;
-    case 'man': return `[Manual page for ${parts[1] || '?'} - press q to exit]\n\nNAME\n    ${parts[1]} - ${getManDesc(parts[1])}\n\nSYNOPSIS\n    ${parts[1]} [OPTION]... [FILE]...\n\n(End)`;
-    case 'type': {
-      const c2 = parts[1];
-      const builtins = ['cd', 'echo', 'exit', 'export', 'alias', 'type', 'source', 'history'];
-      return builtins.includes(c2) ? `${c2} is a shell builtin` : `${c2} is /usr/bin/${c2}`;
-    }
-    case 'apropos': return `cp (1)               - copy files and directories\ncpio (1)             - copy files to and from archives`;
-    case 'help': return 'Available commands: ls, cd, pwd, cat, cp, mv, rm, mkdir, rmdir, touch, chmod,\nchown, grep, find, wc, head, tail, tar, gzip, echo, man, type, apropos,\nwhoami, id, groups, who, ping, ifconfig, ip, dig, host, route, uname, date\n\nLab commands: hint, reset, labs';
-    case 'hint': {
-      if (currentLab) {
-        const lab = TERM_LABS.find(l => l.id === currentLab);
-        const progress = labProgress[lab.id] || [];
-        const nextTask = lab.tasks.findIndex((_, i) => !progress.includes(i));
-        if (nextTask >= 0) return `💡 Hint: ${lab.tasks[nextTask].hint}`;
-        return 'All tasks complete!';
-      }
-      return 'Start a lab first. Type "labs" to see available labs.';
-    }
-    case 'reset': {
-      if (currentLab) {
-        labProgress[currentLab] = [];
-        saveTermProgress();
-        return 'Lab progress reset.';
-      }
-      return 'No active lab.';
-    }
-    case 'labs': return TERM_LABS.map((l, i) => {
-      const done = (labProgress[l.id] || []).length;
-      return `  ${i+1}. ${l.title} (${done}/${l.tasks.length})`;
-    }).join('\n');
-    case 'clear': { termOutput = []; return null; }
-    case 'exit': return 'Use the navigation to leave the terminal.';
-    case 'ifconfig': return 'eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500\n        inet 192.168.1.100  netmask 255.255.255.0  broadcast 192.168.1.255\n        inet6 fe80::1  prefixlen 64  scopeid 0x20<link>';
-    case 'ip': {
-      if (parts[1] === 'addr' || parts[1] === 'a') return '2: eth0: <BROADCAST,MULTICAST,UP> mtu 1500\n    inet 192.168.1.100/24 brd 192.168.1.255 scope global eth0\n    inet6 fe80::1/64 scope link';
-      if (parts[1] === 'route') return 'default via 192.168.1.1 dev eth0\n192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.100';
-      return `Usage: ip [ addr | route | link ]`;
-    }
-    case 'ping': return `PING google.com (142.250.80.46): 56 data bytes\n64 bytes from 142.250.80.46: icmp_seq=0 ttl=118 time=12.3 ms\n64 bytes from 142.250.80.46: icmp_seq=1 ttl=118 time=11.8 ms\n64 bytes from 142.250.80.46: icmp_seq=2 ttl=118 time=12.1 ms\n--- google.com ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss`;
-    case 'route': return 'Kernel IP routing table\nDestination     Gateway         Genmask         Flags Metric Ref    Use Iface\ndefault         192.168.1.1     0.0.0.0         UG    100    0        0 eth0\n192.168.1.0     0.0.0.0         255.255.255.0   U     100    0        0 eth0';
-    case 'dig': return `;; ANSWER SECTION:\n${parts[1] || 'google.com'}.    300  IN  A  142.250.80.46`;
-    case 'nslookup': return `Server:   192.168.1.1\nAddress:  192.168.1.1#53\n\nNon-authoritative answer:\nName: ${parts[1] || 'google.com'}\nAddress: 142.250.80.46`;
-    case 'host': return `${parts[1] || 'google.com'} has address 142.250.80.46\n${parts[1] || 'google.com'} has IPv6 address 2607:f8b0:4004:800::200e`;
-    case 'netstat': return 'Active Internet connections\nProto Recv-Q Send-Q Local Address           Foreign Address         State\ntcp        0      0 192.168.1.100:22        0.0.0.0:*               LISTEN';
-    case 'printenv': return parts[1] ? (VFS.vars[parts[1]] || '') : Object.entries(VFS.vars).map(([k,v]) => `${k}=${v}`).join('\n');
-    case 'env': return Object.entries(VFS.vars).map(([k,v]) => `${k}=${v}`).join('\n');
-    case 'export': { const m = cmd.match(/export\s+(\w+)=(.*)/); if (m) VFS.vars[m[1]] = m[2].replace(/['"]/g, ''); return null; }
-    case 'less': case 'more': return `[displaying ${parts[1]} - press q to exit]`;
-    case 'stat': { const p = resolvePath(parts[1]); const f = VFS.files[p]; return f ? `  File: ${parts[1]}\n  Size: ${f.size||4096}\tBlocks: 8\t${f.type==='d'?'directory':'regular file'}\nAccess: (${f.perms||'0644/-rw-r--r--'})\tUid: ( ${f.owner==='root'?'0':'1000'}/${f.owner||VFS.user})\tGid: ( ${f.group==='root'?'0':'1000'}/${f.group||VFS.user})` : `stat: cannot stat '${parts[1]}': No such file or directory`; }
-    default: {
-      // Variable assignment
-      const varMatch = cmd.match(/^(\w+)=(.*)$/);
-      if (varMatch) { VFS.vars[varMatch[1]] = varMatch[2].replace(/['"]/g, ''); return null; }
-      // Pipe handling
-      if (cmd.includes('|')) return '[pipe output]';
-      return `bash: ${base}: command not found`;
-    }
+function renderTerminal(){
+  if(!currentLab){
+    let html=`<div style="text-align:center;margin-bottom:1rem;color:var(--muted);font-size:0.85rem">Practice Linux commands in a simulated terminal</div><div class="grid">`;
+    TERM_LABS.forEach(lab=>{const done=(labProgress[lab.id]||[]).length,total=lab.tasks.length;
+      html+=`<div class="sec-card" data-lab="${lab.id}"><div class="icon" style="background:${done===total?'var(--green-light)':'var(--card)'}">💻</div><div class="info"><h3>${lab.title}</h3><div class="meta">Section ${lab.section} · ${done}/${total} tasks</div></div><div class="ring ${done===total?'ring-3':done>0?'ring-1':''}">${done===total?'✓':done>0?done:'-'}</div></div>`});
+    return html+`</div>`;
   }
-}
-
-function resolvePath(p) {
-  if (!p) return VFS.cwd;
-  if (p.startsWith('~')) p = VFS.home + p.slice(1);
-  if (p.startsWith('/')) return p.replace(/\/+$/, '') || '/';
-  // Relative path
-  let resolved = VFS.cwd + '/' + p;
-  // Handle ..
-  const parts = resolved.split('/').filter(Boolean);
-  const stack = [];
-  parts.forEach(part => { if (part === '..') stack.pop(); else if (part !== '.') stack.push(part); });
-  return '/' + stack.join('/');
-}
-
-function getManDesc(cmd) {
-  const descs = { ls:'list directory contents', cd:'change directory', cp:'copy files', mv:'move files', rm:'remove files', mkdir:'make directories', chmod:'change file mode bits', grep:'print lines matching a pattern', find:'search for files', tar:'archive utility', cat:'concatenate files', wc:'word count', head:'output first part of files', tail:'output last part of files', man:'manual pager', ping:'send ICMP packets', ip:'show routing and devices' };
-  return descs[cmd] || 'command description';
-}
-
-function renderTerminal() {
-  let html = '';
-  
-  if (!currentLab) {
-    // Lab selection
-    html += `<div class="panel"><h2>💻 Practice Terminal</h2>
-      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Hands-on labs to practice Linux commands. Complete tasks in the simulated terminal below.</p>
-      <div class="grid">`;
-    TERM_LABS.forEach(lab => {
-      const done = (labProgress[lab.id] || []).length;
-      const total = lab.tasks.length;
-      const pct = Math.round((done / total) * 100);
-      html += `<div class="sec-card" data-lab="${lab.id}">
-        <h3>${lab.title}</h3>
-        <div class="meta"><span>Section ${lab.section}</span><span>${done}/${total} tasks</span></div>
-        <div class="mastery mastery-${done===total?3:done>0?1:0}">${done===total?'✓':done>0?'◔':'—'}</div>
-      </div>`;
-    });
-    html += `</div></div>`;
-  } else {
-    const lab = TERM_LABS.find(l => l.id === currentLab);
-    const progress = labProgress[lab.id] || [];
-    
-    // Task list
-    html += `<button class="back-btn" data-termback>← Back to Labs</button>
-      <div class="term-tasks"><h3>📋 ${lab.title}</h3>`;
-    lab.tasks.forEach((task, i) => {
-      const done = progress.includes(i);
-      html += `<div class="term-task ${done?'done':''}"><span class="${done?'check':'pending'}">${done?'✓':'○'}</span><span>${task.desc}</span></div>`;
-    });
-    html += `</div>`;
-    
-    // Terminal
-    html += `<div class="term-wrap"><div class="term-bar">
-      <div class="term-dot" style="background:#ff5f57"></div>
-      <div class="term-dot" style="background:#febc2e"></div>
-      <div class="term-dot" style="background:#28c840"></div>
-      <span>student@linux-lab: ${VFS.cwd}</span>
-    </div><div class="term-body" id="termBody">`;
-    
-    termOutput.forEach(line => {
-      if (line.type === 'cmd') {
-        html += `<div class="term-line"><span class="prompt">student@linux-lab</span>:<span class="path">${VFS.cwd}</span>$ <span class="cmd">${esc(line.text)}</span></div>`;
-      } else if (line.type === 'error') {
-        html += `<div class="term-line"><span class="error">${esc(line.text)}</span></div>`;
-      } else if (line.type === 'success') {
-        html += `<div class="term-line"><span style="color:var(--green)">${esc(line.text)}</span></div>`;
-      } else {
-        html += `<div class="term-line"><span class="output">${esc(line.text)}</span></div>`;
-      }
-    });
-    
-    html += `<div class="term-input-line"><span class="prompt">student@linux-lab</span>:<span class="path">${VFS.cwd}</span>$ <input class="term-input" id="termInput" type="text" autofocus spellcheck="false" autocomplete="off"></div>`;
-    html += `</div></div>`;
-    html += `<p style="color:var(--muted);font-size:0.75rem;margin-top:0.5rem;text-align:center">Type "hint" for help • "reset" to restart • "clear" to clear screen</p>`;
-  }
+  const lab=TERM_LABS.find(l=>l.id===currentLab),progress=labProgress[lab.id]||[];
+  let html=`<button class="back-btn" data-termback>← Back to Labs</button>
+    <div class="term-tasks"><h3>📋 ${lab.title}</h3>`;
+  lab.tasks.forEach((t,i)=>{const d=progress.includes(i);html+=`<div class="term-task ${d?'done':''}"><span class="${d?'check':'pending'}">${d?'✓':'○'}</span><span>${t.desc}</span></div>`});
+  html+=`</div><div class="term-wrap"><div class="term-bar"><div class="term-dot" style="background:#f38ba8"></div><div class="term-dot" style="background:#f9e2af"></div><div class="term-dot" style="background:#a6e3a1"></div><span>student@linux-lab:${VFS.cwd}</span></div><div class="term-body" id="termBody">`;
+  termOutput.forEach(l=>{
+    if(l.type==='cmd')html+=`<div class="term-line"><span class="prompt">$</span> <span>${esc(l.text)}</span></div>`;
+    else if(l.type==='error')html+=`<div class="term-line"><span class="error">${esc(l.text)}</span></div>`;
+    else if(l.type==='success')html+=`<div class="term-line"><span style="color:#a6e3a1">${esc(l.text)}</span></div>`;
+    else html+=`<div class="term-line">${esc(l.text)}</div>`;
+  });
+  html+=`<div class="term-input-line"><span class="prompt">$</span> <input class="term-input" id="termInput" type="text" autofocus spellcheck="false" autocomplete="off"></div></div></div>
+    <p style="color:var(--muted);font-size:0.73rem;text-align:center;margin-top:0.5rem">hint · reset · clear</p>`;
   return html;
 }
 
-// Terminal-specific event binding (called after render)
-function bindTerminalEvents() {
-  const input = document.getElementById('termInput');
-  if (input) {
-    input.focus();
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        execCommand(input.value);
-        render();
-        setTimeout(() => {
-          const newInput = document.getElementById('termInput');
-          if (newInput) { newInput.focus(); }
-          const body = document.getElementById('termBody');
-          if (body) body.scrollTop = body.scrollHeight;
-        }, 10);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (termHistIdx < termHistory.length - 1) {
-          termHistIdx++;
-          input.value = termHistory[termHistIdx];
-        }
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        if (termHistIdx > 0) {
-          termHistIdx--;
-          input.value = termHistory[termHistIdx];
-        } else {
-          termHistIdx = -1;
-          input.value = '';
-        }
-      } else if (e.key === 'Tab') {
-        e.preventDefault();
-        // Basic tab completion
-        const val = input.value;
-        const cmds = ['ls','cd','pwd','cat','cp','mv','rm','mkdir','rmdir','touch','chmod','grep','find','wc','head','tail','tar','gzip','echo','man','type','whoami','id','groups','ping','ifconfig','clear','hint','reset','labs'];
-        const match = cmds.filter(c => c.startsWith(val));
-        if (match.length === 1) input.value = match[0] + ' ';
-      }
-    });
-  }
-  // Lab selection
-  document.querySelectorAll('[data-lab]').forEach(el => {
-    el.onclick = () => { currentLab = el.dataset.lab; termOutput = [{ type: 'output', text: `Lab: ${TERM_LABS.find(l=>l.id===currentLab).title}\nComplete the tasks listed above. Type "hint" if you get stuck.\n` }]; render(); };
-  });
-  document.querySelectorAll('[data-termback]').forEach(el => {
-    el.onclick = () => { currentLab = null; render(); };
-  });
+// === EVENTS ===
+function bindEvents(){
+  document.querySelectorAll('[data-m]').forEach(b=>{b.onclick=()=>{S.mode=b.dataset.m;S.currentSection=null;save();render()}});
+  document.querySelectorAll('[data-topic]').forEach(b=>{b.onclick=()=>{S.topicFilter=b.dataset.topic||null;S.fcIdx=0;save();render()}});
+  document.querySelectorAll('[data-sec]').forEach(e=>{e.onclick=()=>{S.currentSection=e.dataset.sec;save();render()}});
+  document.querySelectorAll('[data-back]').forEach(e=>{e.onclick=()=>{S.currentSection=null;save();render()}});
+  document.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>{S.sectionTab=b.dataset.tab;save();render()}});
+
+  const revealBtn=document.getElementById('revealBtn');
+  if(revealBtn)revealBtn.onclick=()=>{document.getElementById('answerBox').classList.remove('answer-hidden');document.getElementById('gradeBox').classList.remove('answer-hidden');revealBtn.style.display='none'};
+  const hintBtn=document.getElementById('hintBtn');
+  if(hintBtn)hintBtn.onclick=()=>{document.getElementById('hintBox').classList.toggle('answer-hidden')};
+
+  document.querySelectorAll('.grade[data-grade]').forEach(b=>{b.onclick=()=>{
+    const grade=parseInt(b.dataset.grade),cardId=b.dataset.card;
+    if(cardId){gradeCard(cardId,grade);S.fcIdx++;S.fcFlipped=false}
+    else{const cards=getCardsBySection(S.currentSection).filter(c=>isDue(c.id));if(cards.length)gradeCard(cards[0].id,grade)}
+    lastGrade=grade;showEncouragement=grade>=2;save();render();
+  }});
+
+  const fc=document.getElementById('flashcard');
+  if(fc)fc.onclick=()=>{S.fcFlipped=!S.fcFlipped;save();render()};
+  document.querySelectorAll('[data-fc]').forEach(b=>{b.onclick=()=>{if(b.dataset.fc==='prev')S.fcIdx=Math.max(0,S.fcIdx-1);else if(b.dataset.fc==='next')S.fcIdx++;else S.fcIdx=Math.floor(Math.random()*ALL_CARDS.length);S.fcFlipped=false;save();render()}});
+  document.querySelectorAll('[data-filter]').forEach(b=>{b.onclick=()=>{S.fcFilter=b.dataset.filter;S.fcIdx=0;S.fcFlipped=false;save();render()}});
 }
 
-// Keyboard navigation
-document.addEventListener('keydown', e => {
-  if (S.mode === 'terminal') return; // Terminal handles its own keys
-  if (S.mode === 'flashcards') {
-    if (e.key === 'ArrowRight') { S.fcIdx++; S.fcFlipped = false; save(); render(); }
-    else if (e.key === 'ArrowLeft') { S.fcIdx = Math.max(0, S.fcIdx - 1); S.fcFlipped = false; save(); render(); }
-    else if (e.key === ' ') { e.preventDefault(); S.fcFlipped = !S.fcFlipped; save(); render(); }
-  }
-  if (S.mode === 'challenge' && S.currentSection) {
-    if (e.key === ' ') { e.preventDefault(); const ab = document.getElementById('answerBox'); if (ab) ab.classList.add('show'); }
-  }
+function bindTerminalEvents(){
+  const input=document.getElementById('termInput');
+  if(input){input.focus();input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){execCommand(input.value);render();setTimeout(()=>{const i=document.getElementById('termInput');if(i)i.focus();const b=document.getElementById('termBody');if(b)b.scrollTop=b.scrollHeight},10)}
+    else if(e.key==='ArrowUp'){e.preventDefault();if(termHistIdx<termHistory.length-1){termHistIdx++;input.value=termHistory[termHistIdx]}}
+    else if(e.key==='ArrowDown'){e.preventDefault();if(termHistIdx>0){termHistIdx--;input.value=termHistory[termHistIdx]}else{termHistIdx=-1;input.value=''}}
+    else if(e.key==='Tab'){e.preventDefault();const cmds=['ls','cd','pwd','cat','cp','mv','rm','mkdir','rmdir','touch','chmod','grep','find','wc','head','tail','tar','echo','man','type','whoami','id','groups','ping','clear','hint','reset'];const m=cmds.filter(c=>c.startsWith(input.value));if(m.length===1)input.value=m[0]+' '}
+  })}
+  document.querySelectorAll('[data-lab]').forEach(e=>{e.onclick=()=>{currentLab=e.dataset.lab;termOutput=[{type:'output',text:`Lab: ${TERM_LABS.find(l=>l.id===currentLab).title}\nType commands to complete tasks. "hint" for help.\n`}];render()}});
+  document.querySelectorAll('[data-termback]').forEach(e=>{e.onclick=()=>{currentLab=null;render()}});
+}
+
+document.addEventListener('keydown',e=>{
+  if(S.mode==='terminal')return;
+  if(S.mode==='flashcards'){if(e.key==='ArrowRight'){S.fcIdx++;S.fcFlipped=false;save();render()}else if(e.key==='ArrowLeft'){S.fcIdx=Math.max(0,S.fcIdx-1);S.fcFlipped=false;save();render()}else if(e.key===' '){e.preventDefault();S.fcFlipped=!S.fcFlipped;save();render()}}
+  if(S.mode==='challenge'&&S.currentSection&&e.key===' '){e.preventDefault();const r=document.getElementById('revealBtn');if(r)r.click()}
 });
 
-// Initial render
-updateStreak();
-render();
+updateStreak();render();
 </script>
 </body>
 </html>
