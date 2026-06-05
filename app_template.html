@@ -251,8 +251,8 @@ function buildAllCards(){
       if(!ctx.endsWith('.'))ctx+='.';
       if(/^(Is |Are |Was |Were |Has |Have |Had |Can |Will |Does |Did |Creates? |Contains? )/.test(ctx))return;
       if(ctx.length<15)return;
-      cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`💻 What does this command do?\n\n$ ${cmd.command}`,back:ctx,sectionTitle:sec.title});
-      cards.push({id:`${secId}::cmdR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`⌨️ What command would you use to:\n\n${ctx}`,back:`$ ${cmd.command}`,sectionTitle:sec.title});
+      cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`$ ${cmd.command}`,back:ctx,sectionTitle:sec.title});
+      cards.push({id:`${secId}::cmdR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`${ctx}`,back:`$ ${cmd.command}`,sectionTitle:sec.title});
     }});
     // Concepts: forward AND reverse - one term = one card
     sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term)){
@@ -260,8 +260,8 @@ function buildAllCards(){
       if(/^_____\s*(are|is|was|were|has|have|can|will)/i.test(cleanDef))return;
       if(/^(are|is|was|were)\s/i.test(cleanDef))return;
       if(cleanDef.replace(/_/g,'').trim().length<20)return;
-      cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:`📝 Define:\n\n${c.term}`,back:cleanDef,sectionTitle:sec.title});
-      cards.push({id:`${secId}::conceptR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'basic',front:`🔍 What term?\n\n${cleanDef.substring(0,150)}`,back:c.term,sectionTitle:sec.title});
+      cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:`${c.term}`,back:cleanDef,sectionTitle:sec.title});
+      cards.push({id:`${secId}::conceptR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'basic',front:`${cleanDef.substring(0,150)}`,back:c.term,sectionTitle:sec.title});
     }});
   }
   return shuffleArray(cards);
@@ -356,7 +356,7 @@ function renderSectionChallenge(){
   return`<button class="back-btn" data-back>← Back</button>
     <div class="focus">
       <div class="focus-progress"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span>${done}/${allCards.length}</span></div>
-      <div class="focus-label">${isNew?'🆕 New':'🔄 Review'} · ${card.type}</div>
+      <div class="focus-label">${isNew?'🆕 New':'🔄 Review'} · ${card.type==='command'?'What does this command do?':card.type==='reverse'?'What command does this?':card.type==='concept'?'Define this term':'Answer the question'}</div>
       <div class="focus-q">${esc(card.front)}</div>
       <button class="btn btn-primary" id="revealBtn">Show Answer</button>
       <button class="btn btn-outline btn-sm" id="hintBtn" style="margin-left:0.5rem">💡 Hint</button>
