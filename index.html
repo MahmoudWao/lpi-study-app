@@ -141,7 +141,24 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .term-task.done{color:var(--muted);text-decoration:line-through}
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:600px){.app{padding:0.5rem}.panel{padding:1rem}.challenge{padding:1rem}}
+@media(max-width:600px){
+  .app{padding:0.5rem}
+  .panel{padding:1rem}
+  .challenge{padding:1rem}
+  .nav button{padding:0.5rem 0.7rem;font-size:0.78rem}
+  .fc-face{padding:1.2rem 1rem}
+  .fc-front h3{font-size:0.88rem}
+  .term-body{min-height:250px;max-height:55vh;font-size:0.78rem}
+  .term-input{font-size:16px}
+  .grade-btns{gap:0.4rem}
+  .grade-btn{padding:0.6rem 0.9rem;font-size:0.8rem}
+  .sec-card{padding:0.9rem 1rem}
+  .pills button{padding:0.35rem 0.6rem;font-size:0.72rem}
+  .lesson-text{font-size:0.84rem;max-height:60vh}
+  .stats{gap:0.5rem}
+  .stat{padding:0.6rem 0.8rem;min-width:70px}
+}
+.exercise-text,.lesson-text,.challenge-q,.answer-section p,.fc-back p,.term-line{word-break:break-word;overflow-wrap:break-word}
 </style>
 </head>
 <body>
