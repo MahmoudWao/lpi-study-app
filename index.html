@@ -217,12 +217,26 @@ function isDue(id){const c=S.cards[id];return !c||Date.now()>=c.due}
 function buildAllCards(){
   const cards=[];
   for(const[secId,sec]of Object.entries(DATA)){
-    sec.qa_pairs.forEach((qa,i)=>{cards.push({id:`${secId}::qa::${i}`,type:'question',section:secId,topic:sec.topic_num,difficulty:qa.difficulty,front:qa.question,back:qa.answer,sectionTitle:sec.title})});
-    sec.commands.forEach((cmd,i)=>{if(cmd.command.length>3&&cmd.context.length>5)cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`What does this command do?\n\n$ ${cmd.command}`,back:cmd.context,sectionTitle:sec.title})});
-    sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term))cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:`What is: ${c.term}?`,back:c.definition,sectionTitle:sec.title})});
+    // Q&A pairs - keep short, skip overly long ones
+    sec.qa_pairs.forEach((qa,i)=>{
+      if(qa.question.length<250)cards.push({id:`${secId}::qa::${i}`,type:'question',section:secId,topic:sec.topic_num,difficulty:qa.difficulty,front:qa.question.substring(0,200),back:qa.answer.substring(0,300),sectionTitle:sec.title});
+    });
+    // Commands: forward (cmd→meaning) AND reverse (meaning→cmd)
+    sec.commands.forEach((cmd,i)=>{if(cmd.command.length>3&&cmd.command.length<60&&cmd.context.length>5){
+      cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`💻 What does this do?\n\n$ ${cmd.command}`,back:cmd.context,sectionTitle:sec.title});
+      cards.push({id:`${secId}::cmdR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`⌨️ What command?\n\n${cmd.context}`,back:`$ ${cmd.command}`,sectionTitle:sec.title});
+    }});
+    // Concepts: forward (term→def) AND reverse (def→term)
+    sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term)){
+      const shortDef=c.definition.substring(0,200);
+      cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:`📝 Define:\n\n${c.term}`,back:shortDef,sectionTitle:sec.title});
+      cards.push({id:`${secId}::conceptR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'basic',front:`🔍 What term?\n\n${shortDef.substring(0,150)}`,back:c.term,sectionTitle:sec.title});
+    }});
   }
-  return cards;
+  // Shuffle by default using seeded shuffle (consistent per session)
+  return shuffleArray(cards);
 }
+function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*( i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const ALL_CARDS=buildAllCards();
 function getDueCards(){return ALL_CARDS.filter(c=>isDue(c.id))}
 function getCardsBySection(secId){return ALL_CARDS.filter(c=>c.section===secId)}
@@ -377,12 +391,13 @@ function renderFlashcards(){
   if(!filtered.length)return html+`<div class="encourage"><div class="big">🎉</div><h3>All caught up!</h3><p>No cards due right now.</p></div>`;
 
   const idx=S.fcIdx%filtered.length;const card=filtered[idx];
+  const dir=card.type==='reverse'?'🔄 Reverse':'→ Forward';
   html+=`<div class="fc-wrap"><div class="fc ${S.fcFlipped?'flipped':''}" id="flashcard">
     <div class="fc-face fc-front"><span class="fc-type">${card.type} · ${card.sectionTitle}</span><h3>${esc(card.front)}</h3></div>
-    <div class="fc-face fc-back"><span class="fc-type">Answer</span><p>${esc(card.back)}</p></div>
+    <div class="fc-face fc-back"><span class="fc-type">${dir}</span><p>${esc(card.back)}</p></div>
   </div></div>
-  <p class="fc-hint">Tap to flip · Arrow keys to navigate</p>
-  <div class="fc-nav"><button data-fc="prev">←</button><span style="color:var(--muted);font-size:0.8rem">${idx+1}/${filtered.length}</span><button data-fc="next">→</button><button data-fc="shuffle">🔀</button></div>`;
+  <p class="fc-hint">Tap to flip · Arrow keys to navigate · Cards are shuffled across topics</p>
+  <div class="fc-nav"><button data-fc="prev">←</button><span style="color:var(--muted);font-size:0.8rem">${idx+1}/${filtered.length}</span><button data-fc="next">→</button><button data-fc="shuffle">🔀 Reshuffle</button></div>`;
   if(S.fcFlipped){
     html+=`<div class="grades" style="margin-top:1rem">
       <div class="grade grade-0" data-grade="0" data-card="${card.id}"><span class="emoji">😵</span><span class="label">Missed</span></div>
@@ -617,7 +632,7 @@ function bindEvents(){
 
   const fc=document.getElementById('flashcard');
   if(fc)fc.onclick=()=>{S.fcFlipped=!S.fcFlipped;save();render()};
-  document.querySelectorAll('[data-fc]').forEach(b=>{b.onclick=()=>{if(b.dataset.fc==='prev')S.fcIdx=Math.max(0,S.fcIdx-1);else if(b.dataset.fc==='next')S.fcIdx++;else S.fcIdx=Math.floor(Math.random()*ALL_CARDS.length);S.fcFlipped=false;save();render()}});
+  document.querySelectorAll('[data-fc]').forEach(b=>{b.onclick=()=>{if(b.dataset.fc==='prev')S.fcIdx=Math.max(0,S.fcIdx-1);else if(b.dataset.fc==='next')S.fcIdx++;else{ALL_CARDS.sort(()=>Math.random()-0.5);S.fcIdx=0}S.fcFlipped=false;save();render()}});
   document.querySelectorAll('[data-filter]').forEach(b=>{b.onclick=()=>{S.fcFilter=b.dataset.filter;S.fcIdx=0;S.fcFlipped=false;save();render()}});
 }
 
