@@ -255,13 +255,10 @@ function buildAllCards(){
       cards.push({id:`${secId}::cmdR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`${ctx}`,back:`$ ${cmd.command}`,sectionTitle:sec.title});
     }});
     // Concepts: forward AND reverse - one term = one card
-    sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term)){
-      let cleanDef=c.definition.replace(new RegExp(c.term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),'_____').substring(0,200);
-      if(/^_____\s*(are|is|was|were|has|have|can|will)/i.test(cleanDef))return;
-      if(/^(are|is|was|were)\s/i.test(cleanDef))return;
-      if(cleanDef.replace(/_/g,'').trim().length<20)return;
-      cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:`${c.term}`,back:cleanDef,sectionTitle:sec.title});
-      cards.push({id:`${secId}::conceptR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'basic',front:`${cleanDef.substring(0,150)}`,back:c.term,sectionTitle:sec.title});
+    sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<60&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term)){
+      if(c.definition.length<10)return;
+      cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:c.term,back:c.definition,sectionTitle:sec.title});
+      cards.push({id:`${secId}::conceptR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'basic',front:c.definition.substring(0,150),back:c.term,sectionTitle:sec.title});
     }});
   }
   return shuffleArray(cards);
@@ -357,12 +354,12 @@ function renderSectionChallenge(){
     <div class="focus">
       <div class="focus-progress"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><span>${done}/${allCards.length}</span></div>
       <div class="focus-label">${isNew?'🆕 New':'🔄 Review'} · ${card.type==='command'?'What does this command do?':card.type==='reverse'?'What command does this?':card.type==='concept'?'Define this term':'Answer the question'}</div>
-      <div class="focus-q">${esc(card.front)}</div>
-      <button class="btn btn-primary" id="revealBtn">Show Answer</button>
-      <button class="btn btn-outline btn-sm" id="hintBtn" style="margin-left:0.5rem">💡 Hint</button>
-      <div class="answer answer-hidden" id="hintBox" style="border-left-color:var(--amber);background:var(--amber-light);margin-top:1rem">${getHint(card)}</div>
-      <div class="answer answer-hidden" id="answerBox">${esc(stripQuestion(card.back,card.front))}</div>
-      <div class="grades answer-hidden" id="gradeBox">
+      <div class="fc-wrap"><div class="fc ${S.fcFlipped?'flipped':''}" id="challengeCard">
+        <div class="fc-face fc-front"><h3>${esc(card.front)}</h3></div>
+        <div class="fc-face fc-back"><p>${esc(stripQuestion(card.back,card.front))}</p></div>
+      </div></div>
+      <p class="fc-hint">Tap card to flip</p>
+      <div class="grades ${S.fcFlipped?'':'answer-hidden'}" id="gradeBox">
         <div class="grade grade-0" data-grade="0"><span class="emoji">😵</span><span class="label">Missed</span></div>
         <div class="grade grade-1" data-grade="1"><span class="emoji">😅</span><span class="label">Hard</span></div>
         <div class="grade grade-2" data-grade="2"><span class="emoji">👍</span><span class="label">Good</span></div>
@@ -685,15 +682,15 @@ function bindEvents(){
   document.querySelectorAll('[data-back]').forEach(e=>{e.onclick=()=>{S.currentSection=null;save();render()}});
   document.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>{S.sectionTab=b.dataset.tab;save();render()}});
 
-  const revealBtn=document.getElementById('revealBtn');
-  if(revealBtn)revealBtn.onclick=()=>{document.getElementById('answerBox').classList.remove('answer-hidden');document.getElementById('gradeBox').classList.remove('answer-hidden');revealBtn.style.display='none'};
-  const hintBtn=document.getElementById('hintBtn');
-  if(hintBtn)hintBtn.onclick=()=>{document.getElementById('hintBox').classList.toggle('answer-hidden')};
+  // Challenge card flip
+  const challengeCard=document.getElementById('challengeCard');
+  const ccWrap=challengeCard&&challengeCard.parentElement;
+  if(ccWrap)ccWrap.onclick=()=>{S.fcFlipped=!S.fcFlipped;save();render()};
 
   document.querySelectorAll('.grade[data-grade]').forEach(b=>{b.onclick=()=>{
     const grade=parseInt(b.dataset.grade),cardId=b.dataset.card;
     if(cardId){gradeCard(cardId,grade);S.fcIdx++;S.fcFlipped=false}
-    else{const cards=getCardsBySection(S.currentSection).filter(c=>isDue(c.id));if(cards.length)gradeCard(cards[0].id,grade)}
+    else{const cards=getCardsBySection(S.currentSection).filter(c=>isDue(c.id));if(cards.length)gradeCard(cards[0].id,grade);S.fcFlipped=false}
     lastGrade=grade;showEncouragement=grade>=2;save();render();
   }});
 
@@ -721,7 +718,7 @@ function bindTerminalEvents(){
 document.addEventListener('keydown',e=>{
   if(S.mode==='terminal')return;
   if(S.mode==='flashcards'){if(e.key==='ArrowRight'){S.fcIdx++;S.fcFlipped=false;save();render()}else if(e.key==='ArrowLeft'){S.fcIdx=Math.max(0,S.fcIdx-1);S.fcFlipped=false;save();render()}else if(e.key===' '){e.preventDefault();S.fcFlipped=!S.fcFlipped;save();render()}}
-  if(S.mode==='challenge'&&S.currentSection&&e.key===' '){e.preventDefault();const r=document.getElementById('revealBtn');if(r)r.click()}
+  if(S.mode==='challenge'&&S.currentSection&&e.key===' '){e.preventDefault();S.fcFlipped=!S.fcFlipped;save();render()}
 });
 
 if(localStorage.getItem('lpi_dark')==='true')document.body.classList.add('dark');
