@@ -238,10 +238,16 @@ function buildAllCards(){
       if(/\n.*\d+\./m.test(q))return; // contains sub-numbered items
       cards.push({id:`${secId}::qa::${i}`,type:'question',section:secId,topic:sec.topic_num,difficulty:qa.difficulty,front:q.substring(0,200),back:a.substring(0,300),sectionTitle:sec.title});
     });
-    // Commands: forward AND reverse - keep only short, clear ones
+    // Commands: forward AND reverse - keep only short, clear ones with clean context
     sec.commands.forEach((cmd,i)=>{if(cmd.command.length>3&&cmd.command.length<60&&cmd.context.length>8&&cmd.context.length<120){
-      cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`💻 What does this do?\n\n$ ${cmd.command}`,back:cmd.context,sectionTitle:sec.title});
-      cards.push({id:`${secId}::cmdR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`⌨️ What command?\n\n${cmd.context}`,back:`$ ${cmd.command}`,sectionTitle:sec.title});
+      // Skip context that starts lowercase, has odd punctuation, or is clearly a sentence fragment
+      const ctx=cmd.context.trim();
+      if(/^[a-z]/.test(ctx))return;
+      if(/^[\(\)\[\]:;,]/.test(ctx))return;
+      if(ctx.endsWith(')')&&!ctx.includes('('))return;
+      if(ctx.startsWith('is ')||ctx.startsWith('the ')||ctx.startsWith('and '))return;
+      cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`💻 What does this do?\n\n$ ${cmd.command}`,back:ctx,sectionTitle:sec.title});
+      cards.push({id:`${secId}::cmdR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`⌨️ What command?\n\n${ctx}`,back:`$ ${cmd.command}`,sectionTitle:sec.title});
     }});
     // Concepts: forward AND reverse - one term = one card
     sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term)){
