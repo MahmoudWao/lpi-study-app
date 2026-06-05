@@ -259,6 +259,13 @@ function getCardsBySection(secId){return ALL_CARDS.filter(c=>c.section===secId)}
 
 const root=document.getElementById('root');
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function stripQuestion(answer,question){
+  // Remove repeated question text from start of answer
+  const qFirst50=question.substring(0,50).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const idx=answer.search(new RegExp(qFirst50.substring(0,30)));
+  if(idx>=0){const nlIdx=answer.indexOf('\n',idx+question.length-10);if(nlIdx>0)return answer.substring(nlIdx+1).trim()}
+  return answer;
+}
 
 // Track if we just graded (to show encouragement)
 let showEncouragement=false;
@@ -408,7 +415,7 @@ function renderExercises(){
           <button class="btn btn-primary btn-sm" onclick="this.parentElement.nextElementSibling.classList.remove('answer-hidden')">Check Answer</button>
           <span class="ex-status" id="exStatus${i}"></span>
         </div>
-        <div class="answer answer-hidden" style="margin-top:1rem">${esc(qa.answer)}</div>
+        <div class="answer answer-hidden" style="margin-top:1rem">${esc(stripQuestion(qa.answer,qa.question))}</div>
       </div>`;
     });
     return html;
