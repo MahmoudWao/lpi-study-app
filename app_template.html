@@ -240,14 +240,12 @@ function buildAllCards(){
     });
     // Commands: forward AND reverse - keep only short, clear ones with clean context
     sec.commands.forEach((cmd,i)=>{if(cmd.command.length>3&&cmd.command.length<60&&cmd.context.length>8&&cmd.context.length<120){
-      // Skip context that starts lowercase, has odd punctuation, or is clearly a sentence fragment
-      const ctx=cmd.context.trim();
-      if(/^[a-z]/.test(ctx))return;
-      if(/^[\(\)\[\]:;,]/.test(ctx))return;
-      if(ctx.endsWith(')')&&!ctx.includes('('))return;
-      if(ctx.startsWith('is ')||ctx.startsWith('the ')||ctx.startsWith('and '))return;
-      cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`💻 What does this do?\n\n$ ${cmd.command}`,back:ctx,sectionTitle:sec.title});
-      cards.push({id:`${secId}::cmdR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`⌨️ What command?\n\n${ctx}`,back:`$ ${cmd.command}`,sectionTitle:sec.title});
+      // Clean up context: trim trailing/leading punctuation fragments, capitalize
+      let ctx=cmd.context.trim().replace(/^[\(\)\[\]:;,.\s]+|[\(\):;,\s]+$/g,'').trim();
+      ctx=ctx.charAt(0).toUpperCase()+ctx.slice(1);
+      if(!ctx.endsWith('.'))ctx+='.';
+      cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`💻 What does this command do?\n\n$ ${cmd.command}`,back:ctx,sectionTitle:sec.title});
+      cards.push({id:`${secId}::cmdR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`⌨️ What command would you use to:\n\n${ctx}`,back:`$ ${cmd.command}`,sectionTitle:sec.title});
     }});
     // Concepts: forward AND reverse - one term = one card
     sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term)){
