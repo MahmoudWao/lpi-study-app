@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LPI Linux Essentials — Study Guide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#faf9f7;--text:#2c2c2c;--muted:#6b6b6b;--accent:#4338ca;--surface:#fff;--border:#e8e5e0;--code-bg:#f5f2ee;--serif:'Georgia','Times New Roman',serif;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--serif);font-size:18px;line-height:1.9}
+.dark{--bg:#1a1a2e;--text:#e0ddd5;--muted:#9a9a9a;--accent:#a5b4fc;--surface:#222244;--border:#333;--code-bg:#16213e}
+
+/* Top bar */
+.topbar{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border);padding:0.6rem 1.5rem;display:flex;align-items:center;gap:1rem;font-family:var(--sans);font-size:0.82rem}
+.topbar h1{font-size:0.9rem;font-weight:600;color:var(--accent);flex:1}
+.topbar button{background:none;border:1px solid var(--border);padding:0.3rem 0.7rem;border-radius:6px;cursor:pointer;font-size:0.8rem;color:var(--text);font-family:var(--sans)}
+.topbar button:hover{border-color:var(--accent);color:var(--accent)}
+.topbar select{border:1px solid var(--border);padding:0.3rem 0.5rem;border-radius:6px;font-size:0.8rem;background:var(--surface);color:var(--text)}
+
+/* Reading area */
+.reader{max-width:680px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+.page-content{white-space:pre-wrap;word-wrap:break-word;font-size:var(--fs,18px)}
+.page-content h1,.page-content h2,.page-content h3{font-family:var(--sans);margin:1.5em 0 0.5em;color:var(--accent);line-height:1.3}
+
+/* Page nav */
+.page-nav{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:var(--sans);font-size:0.85rem}
+.page-nav button{background:var(--accent);color:#fff;border:none;padding:0.5rem 1.2rem;border-radius:6px;cursor:pointer;font-size:0.82rem}
+.page-nav button:disabled{opacity:0.3;cursor:not-allowed}
+.page-nav span{color:var(--muted)}
+
+/* Progress */
+.progress{height:3px;background:var(--border);position:fixed;top:0;left:0;right:0;z-index:20}
+.progress-fill{height:100%;background:var(--accent);transition:width 0.3s}
+
+/* Font size control */
+.fs-controls{display:flex;gap:0.3rem;align-items:center}
+.fs-controls button{width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:1rem}
+
+/* Back to app link */
+.back-link{color:var(--accent);text-decoration:none;font-size:0.82rem}
+.back-link:hover{text-decoration:underline}
+
+@media(max-width:600px){
+  .reader{padding:1.5rem 1rem 3rem}
+  body{font-size:16px}
+  .topbar{padding:0.5rem 1rem;gap:0.5rem}
+}
+</style>
+</head>
+<body>
+<div class="progress"><div class="progress-fill" id="progressBar"></div></div>
+<div class="topbar">
+  <a href="index.html" class="back-link">← App</a>
+  <h1>LPI Linux Essentials v1.6</h1>
+  <div class="fs-controls">
+    <button id="fsDown">A-</button>
+    <button id="fsUp">A+</button>
+  </div>
+  <button id="themeToggle">🌓</button>
+  <select id="pageSelect"></select>
+</div>
+<div class="reader">
+  <div class="page-content" id="content"></div>
+  <div class="page-nav">
+    <button id="prevBtn">← Prev</button>
+    <span id="pageInfo"></span>
+    <button id="nextBtn">Next →</button>
+  </div>
+</div>
+<script>
+let pages=[];
+let currentPage=parseInt(localStorage.getItem('lpi_ebook_page')||'0');
+let fontSize=parseInt(localStorage.getItem('lpi_ebook_fs')||'18');
+
+async function init(){
+  const resp=await fetch('ebook_pages.json');
+  pages=await resp.json();
+  // Build page select
+  const sel=document.getElementById('pageSelect');
+  pages.forEach((_,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`Page ${i+1}`;sel.appendChild(o)});
+  sel.value=currentPage;
+  sel.onchange=()=>{currentPage=parseInt(sel.value);renderPage()};
+  renderPage();
+}
+
+function renderPage(){
+  if(currentPage<0)currentPage=0;
+  if(currentPage>=pages.length)currentPage=pages.length-1;
+  let text=pages[currentPage];
+  // Format: detect headings (ALL CAPS lines, or lines starting with #/numbers like "1.1 ")
+  text=text.replace(/^(TOPIC \d+:.*)/gm,'<h1>$1</h1>');
+  text=text.replace(/^(\d+\.\d+\s+(?:Lesson|Linux|Major|Open|ICT|Command|Using|Creating|Archiving|Searching|Turning|Choosing|Understanding|Where|Your|Basic|Managing|Special).*)/gm,'<h2>$1</h2>');
+  text=text.replace(/^(Introduction|Summary|Guided Exercises|Explorational Exercises|Answers to .*)$/gm,'<h3>$1</h3>');
+
+  document.getElementById('content').innerHTML=text;
+  document.getElementById('content').style.setProperty('--fs',fontSize+'px');
+  document.getElementById('pageInfo').textContent=`Page ${currentPage+1} of ${pages.length}`;
+  document.getElementById('prevBtn').disabled=currentPage===0;
+  document.getElementById('nextBtn').disabled=currentPage===pages.length-1;
+  document.getElementById('pageSelect').value=currentPage;
+  document.getElementById('progressBar').style.width=((currentPage+1)/pages.length*100)+'%';
+  localStorage.setItem('lpi_ebook_page',currentPage.toString());
+  window.scrollTo(0,0);
+}
+
+document.getElementById('prevBtn').onclick=()=>{currentPage--;renderPage()};
+document.getElementById('nextBtn').onclick=()=>{currentPage++;renderPage()};
+document.getElementById('fsDown').onclick=()=>{fontSize=Math.max(14,fontSize-2);localStorage.setItem('lpi_ebook_fs',fontSize);renderPage()};
+document.getElementById('fsUp').onclick=()=>{fontSize=Math.min(28,fontSize+2);localStorage.setItem('lpi_ebook_fs',fontSize);renderPage()};
+document.getElementById('themeToggle').onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('lpi_ebook_dark',document.body.classList.contains('dark'))};
+
+// Load preferences
+if(localStorage.getItem('lpi_ebook_dark')==='true')document.body.classList.add('dark');
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();currentPage++;renderPage()}
+  else if(e.key==='ArrowLeft'){currentPage--;renderPage()}
+});
+
+init();
+</script>
+</body>
+</html>

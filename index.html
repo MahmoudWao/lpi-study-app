@@ -402,7 +402,8 @@ function getHint(card){
 
 function renderLearn(){
   if(S.currentSection)return renderSectionLearn();
-  let html=renderPills()+`<div class="grid">`;
+  let html=`<div style="text-align:center;margin-bottom:1rem"><a href="ebook.html" style="color:var(--primary);font-size:0.85rem;text-decoration:none;border:1.5px solid var(--border);padding:0.5rem 1rem;border-radius:8px;display:inline-block">📖 Read Full Textbook (ebook)</a></div>`;
+  html+=renderPills()+`<div class="grid">`;
   for(const[id,sec]of Object.entries(DATA)){
     if(S.topicFilter&&sec.topic_num!==S.topicFilter)continue;
     const m=S.mastery[id]||{level:0};
