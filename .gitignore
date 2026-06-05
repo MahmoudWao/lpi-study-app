@@ -1,0 +1,6 @@
+# Build/extraction scripts and intermediate data
+deep_content.json
+structured_data.json
+quiz_data.json
+*.pyc
+__pycache__/

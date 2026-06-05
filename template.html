@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LPI Linux Essentials 010 - Study App</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #1a1a2e;
+  --surface: #16213e;
+  --card: #0f3460;
+  --accent: #e94560;
+  --accent2: #0ea5e9;
+  --text: #eee;
+  --muted: #94a3b8;
+  --success: #22c55e;
+  --border: #334155;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.container { max-width: 900px; margin: 0 auto; padding: 1rem; }
+header { text-align: center; padding: 1.5rem 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+header h1 { font-size: 1.5rem; color: var(--accent2); }
+header p { color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem; }
+nav { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+nav button { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+nav button:hover, nav button.active { background: var(--accent); border-color: var(--accent); }
+.topic-nav { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem; }
+.topic-nav button { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+.topic-nav button:hover, .topic-nav button.active { color: var(--text); border-color: var(--accent2); background: var(--surface); }
+.section-list { display: grid; gap: 0.8rem; }
+.section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; cursor: pointer; transition: all 0.2s; }
+.section-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+.section-card h3 { font-size: 0.95rem; color: var(--accent2); }
+.section-card .topic-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+.panel h2 { font-size: 1.1rem; color: var(--accent2); margin-bottom: 1rem; }
+.exercise-text { white-space: pre-wrap; line-height: 1.7; font-size: 0.9rem; }
+.answer-toggle { margin-top: 1.5rem; }
+.answer-toggle button { background: var(--accent); border: none; color: white; padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+.answer-toggle button:hover { opacity: 0.85; }
+.answer-box { margin-top: 1rem; padding: 1rem; background: var(--card); border-radius: 6px; border-left: 3px solid var(--success); white-space: pre-wrap; line-height: 1.7; font-size: 0.9rem; display: none; }
+.answer-box.show { display: block; }
+/* Flashcard */
+.flashcard-container { perspective: 1000px; margin: 1.5rem auto; max-width: 600px; }
+.flashcard { position: relative; width: 100%; min-height: 250px; cursor: pointer; transform-style: preserve-3d; transition: transform 0.5s; }
+.flashcard.flipped { transform: rotateY(180deg); }
+.flashcard-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 12px; padding: 2rem; display: flex; align-items: center; justify-content: center; text-align: center; }
+.flashcard-front { background: linear-gradient(135deg, var(--card), var(--surface)); border: 1px solid var(--border); }
+.flashcard-back { background: linear-gradient(135deg, #0f3460, #1a1a2e); border: 1px solid var(--success); transform: rotateY(180deg); }
+.flashcard-front h3 { font-size: 1rem; line-height: 1.6; }
+.flashcard-back p { font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; }
+.flashcard-nav { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1rem; }
+.flashcard-nav button { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+.flashcard-nav button:hover { border-color: var(--accent2); }
+.flashcard-counter { color: var(--muted); font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 0.5rem; }
+/* Progress */
+.progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 1rem; }
+.progress-fill { height: 100%; background: var(--accent2); border-radius: 2px; transition: width 0.3s; }
+.back-btn { background: none; border: none; color: var(--accent2); cursor: pointer; font-size: 0.85rem; margin-bottom: 1rem; padding: 0.3rem 0; }
+.back-btn:hover { text-decoration: underline; }
+.stats { display: flex; gap: 1rem; justify-content: center; margin: 1rem 0; flex-wrap: wrap; }
+.stat { background: var(--card); padding: 0.8rem 1.2rem; border-radius: 6px; text-align: center; }
+.stat .num { font-size: 1.4rem; font-weight: bold; color: var(--accent2); }
+.stat .label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+@media (max-width: 600px) {
+  nav button { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+  .panel { padding: 1rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🐧 LPI Linux Essentials 010</h1>
+    <p>Study App — Version 1.6 Exam Preparation</p>
+  </header>
+
+  <nav id="mainNav">
+    <button class="active" data-mode="topics">📚 Topics</button>
+    <button data-mode="quiz">✍️ Quiz Mode</button>
+    <button data-mode="flashcards">🃏 Flashcards</button>
+    <button data-mode="progress">📊 Progress</button>
+  </nav>
+
+  <div id="app"></div>
+</div>
+
+<script>
+const DATA = QUIZ_DATA_PLACEHOLDER;
+
+const TOPICS = {
+  '1': 'The Linux Community and a Career in Open Source',
+  '2': 'Finding Your Way on a Linux System',
+  '3': 'The Power of the Command Line',
+  '4': 'The Linux Operating System',
+  '5': 'Security and File Permissions'
+};
+
+let state = {
+  mode: 'topics',
+  topicFilter: null,
+  currentSection: null,
+  flashcardIdx: 0,
+  flashcardFlipped: false,
+  progress: JSON.parse(localStorage.getItem('lpi_progress') || '{}')
+};
+
+function saveProgress() {
+  localStorage.setItem('lpi_progress', JSON.stringify(state.progress));
+}
+
+function markStudied(secId) {
+  if (!state.progress[secId]) state.progress[secId] = {};
+  state.progress[secId].studied = true;
+  state.progress[secId].date = new Date().toLocaleDateString();
+  saveProgress();
+}
+
+function cleanText(text) {
+  return text
+    .replace(/Linux Essentials \(Version 1\.6\)[^\n]*\n[^\n]*\n[^\n]*/g, '')
+    .replace(/Version: \d{4}-\d{2}-\d{2}[^\n]*/g, '')
+    .replace(/\d+\s*\|\s*\n\s*learning\.lpi\.org[^\n]*/g, '')
+    .replace(/learning\.lpi\.org[^\n]*/g, '')
+    .replace(/Licensed under CC BY-NC-ND[^\n]*/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function getFlashcards() {
+  const cards = [];
+  for (const [id, sec] of Object.entries(DATA)) {
+    const summary = cleanText(sec.summary);
+    const bullets = summary.split('\n').filter(l => l.startsWith('•') || l.startsWith('-'));
+    bullets.forEach(b => {
+      const text = b.replace(/^[•\-]\s*/, '').trim();
+      if (text.length > 10) {
+        cards.push({ q: text, section: `${id} ${sec.title}`, topic: sec.topic_num });
+      }
+    });
+    // Add exercise-based cards
+    const exercises = cleanText(sec.exercises);
+    const answers = cleanText(sec.answers);
+    const exLines = exercises.split(/\n(?=\d+\.)/).filter(l => /^\d+\./.test(l));
+    const ansLines = answers.split(/\n(?=\d+\.)/).filter(l => /^\d+\./.test(l));
+    for (let i = 0; i < Math.min(exLines.length, ansLines.length); i++) {
+      const q = exLines[i].replace(/^\d+\./, '').trim();
+      const a = ansLines[i].replace(/^\d+\./, '').trim();
+      if (q.length > 15 && q.length < 300 && a.length > 5) {
+        cards.push({ q, a, section: `${id} ${sec.title}`, topic: sec.topic_num });
+      }
+    }
+  }
+  return cards;
+}
+
+const allFlashcards = getFlashcards();
+
+function render() {
+  const app = document.getElementById('app');
+  switch (state.mode) {
+    case 'topics': renderTopics(app); break;
+    case 'quiz': renderQuiz(app); break;
+    case 'flashcards': renderFlashcards(app); break;
+    case 'progress': renderProgress(app); break;
+  }
+}
+
+function renderTopics(app) {
+  if (state.currentSection) {
+    renderSectionDetail(app);
+    return;
+  }
+  let html = `<div class="topic-nav">
+    <button class="${!state.topicFilter ? 'active' : ''}" onclick="setTopicFilter(null)">All</button>`;
+  for (const [num, name] of Object.entries(TOPICS)) {
+    html += `<button class="${state.topicFilter === num ? 'active' : ''}" onclick="setTopicFilter('${num}')">Topic ${num}</button>`;
+  }
+  html += `</div><div class="section-list">`;
+  for (const [id, sec] of Object.entries(DATA)) {
+    if (state.topicFilter && sec.topic_num !== state.topicFilter) continue;
+    const studied = state.progress[id]?.studied ? ' ✓' : '';
+    html += `<div class="section-card" onclick="openSection('${id}')">
+      <h3>${id} ${sec.title}${studied}</h3>
+      <div class="topic-label">Topic ${sec.topic_num}: ${sec.topic}</div>
+    </div>`;
+  }
+  html += `</div>`;
+  app.innerHTML = html;
+}
+
+function renderSectionDetail(app) {
+  const sec = DATA[state.currentSection];
+  const exercises = cleanText(sec.exercises);
+  const answers = cleanText(sec.answers);
+  const summary = cleanText(sec.summary);
+  markStudied(state.currentSection);
+
+  app.innerHTML = `
+    <button class="back-btn" onclick="closeSection()">← Back to Topics</button>
+    <div class="panel">
+      <h2>${state.currentSection} — ${sec.title}</h2>
+      ${summary ? `<div style="margin-bottom:1.5rem;padding:1rem;background:var(--card);border-radius:6px;border-left:3px solid var(--accent2)">
+        <strong style="color:var(--accent2)">Summary</strong>
+        <div class="exercise-text" style="margin-top:0.5rem">${escHtml(summary)}</div>
+      </div>` : ''}
+      <h3 style="color:var(--accent);margin-bottom:0.8rem">Guided Exercises</h3>
+      <div class="exercise-text">${escHtml(exercises)}</div>
+      <div class="answer-toggle">
+        <button onclick="toggleAnswer()">Show Answers</button>
+      </div>
+      <div class="answer-box" id="answerBox">${escHtml(answers)}</div>
+    </div>`;
+}
+
+function renderQuiz(app) {
+  if (state.currentSection) {
+    renderQuizSection(app);
+    return;
+  }
+  let html = `<div class="topic-nav">
+    <button class="${!state.topicFilter ? 'active' : ''}" onclick="setTopicFilter(null)">All</button>`;
+  for (const [num, name] of Object.entries(TOPICS)) {
+    html += `<button class="${state.topicFilter === num ? 'active' : ''}" onclick="setTopicFilter('${num}')">Topic ${num}</button>`;
+  }
+  html += `</div><div class="section-list">`;
+  for (const [id, sec] of Object.entries(DATA)) {
+    if (state.topicFilter && sec.topic_num !== state.topicFilter) continue;
+    html += `<div class="section-card" onclick="openSection('${id}')">
+      <h3>✍️ ${id} ${sec.title}</h3>
+      <div class="topic-label">Practice exercises from this section</div>
+    </div>`;
+  }
+  html += `</div>`;
+  app.innerHTML = html;
+}
+
+function renderQuizSection(app) {
+  const sec = DATA[state.currentSection];
+  const exercises = cleanText(sec.exercises);
+  const answers = cleanText(sec.answers);
+  const questions = exercises.split(/\n(?=\d+\.)/).filter(l => /^\d+\./.test(l));
+  const answerList = answers.split(/\n(?=\d+\.)/).filter(l => /^\d+\./.test(l));
+
+  let html = `<button class="back-btn" onclick="closeSection()">← Back to Quiz List</button>
+    <div class="panel"><h2>Quiz: ${state.currentSection} — ${sec.title}</h2>
+    <p style="color:var(--muted);margin-bottom:1rem">Answer each question, then reveal the answer to check.</p>`;
+
+  questions.forEach((q, i) => {
+    html += `<div style="margin-bottom:1.5rem;padding:1rem;background:var(--card);border-radius:6px">
+      <div class="exercise-text" style="margin-bottom:0.8rem"><strong>Q${i+1}.</strong> ${escHtml(q.replace(/^\d+\./, '').trim())}</div>
+      <button onclick="this.nextElementSibling.classList.toggle('show');this.textContent=this.textContent==='Show Answer'?'Hide Answer':'Show Answer'" style="background:var(--accent);border:none;color:white;padding:0.4rem 1rem;border-radius:4px;cursor:pointer;font-size:0.8rem">Show Answer</button>
+      <div class="answer-box">${escHtml(answerList[i] ? answerList[i].replace(/^\d+\./, '').trim() : 'Answer not available')}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  app.innerHTML = html;
+}
+
+function renderFlashcards(app) {
+  const filtered = state.topicFilter
+    ? allFlashcards.filter(c => c.topic === state.topicFilter)
+    : allFlashcards;
+
+  if (filtered.length === 0) {
+    app.innerHTML = `<div class="panel"><p>No flashcards available for this filter.</p></div>`;
+    return;
+  }
+
+  const idx = state.flashcardIdx % filtered.length;
+  const card = filtered[idx];
+  const flipped = state.flashcardFlipped;
+
+  let html = `<div class="topic-nav">
+    <button class="${!state.topicFilter ? 'active' : ''}" onclick="setTopicFilter(null)">All</button>`;
+  for (const [num] of Object.entries(TOPICS)) {
+    html += `<button class="${state.topicFilter === num ? 'active' : ''}" onclick="setTopicFilter('${num}')">Topic ${num}</button>`;
+  }
+  html += `</div>
+  <div class="flashcard-container">
+    <div class="flashcard ${flipped ? 'flipped' : ''}" onclick="flipCard()">
+      <div class="flashcard-face flashcard-front">
+        <h3>${escHtml(card.q)}</h3>
+      </div>
+      <div class="flashcard-face flashcard-back">
+        <p>${escHtml(card.a || card.q)}</p>
+      </div>
+    </div>
+  </div>
+  <p class="hint">Click card to flip • ${card.section}</p>
+  <div class="flashcard-nav">
+    <button onclick="prevCard()">◀ Prev</button>
+    <span class="flashcard-counter">${idx + 1} / ${filtered.length}</span>
+    <button onclick="nextCard()">Next ▶</button>
+    <button onclick="shuffleCards()">🔀 Shuffle</button>
+  </div>`;
+  app.innerHTML = html;
+}
+
+function renderProgress(app) {
+  const total = Object.keys(DATA).length;
+  const studied = Object.values(state.progress).filter(p => p.studied).length;
+  const pct = Math.round((studied / total) * 100);
+
+  let html = `<div class="stats">
+    <div class="stat"><div class="num">${studied}/${total}</div><div class="label">Sections Studied</div></div>
+    <div class="stat"><div class="num">${pct}%</div><div class="label">Complete</div></div>
+    <div class="stat"><div class="num">${allFlashcards.length}</div><div class="label">Flashcards</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+  <div class="panel"><h2>Study Progress</h2>`;
+
+  for (const [num, name] of Object.entries(TOPICS)) {
+    const secs = Object.entries(DATA).filter(([,s]) => s.topic_num === num);
+    const done = secs.filter(([id]) => state.progress[id]?.studied).length;
+    html += `<div style="margin:0.8rem 0">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">
+        <span>Topic ${num}: ${name}</span>
+        <span style="color:var(--muted)">${done}/${secs.length}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(done/secs.length)*100}%"></div></div>
+    </div>`;
+  }
+  html += `<button onclick="resetProgress()" style="margin-top:1rem;background:var(--accent);border:none;color:white;padding:0.5rem 1rem;border-radius:4px;cursor:pointer">Reset Progress</button></div>`;
+  app.innerHTML = html;
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function setTopicFilter(f) { state.topicFilter = f; state.flashcardIdx = 0; render(); }
+function openSection(id) { state.currentSection = id; render(); }
+function closeSection() { state.currentSection = null; render(); }
+function toggleAnswer() { document.getElementById('answerBox').classList.toggle('show'); }
+function flipCard() { state.flashcardFlipped = !state.flashcardFlipped; render(); }
+function nextCard() { state.flashcardIdx++; state.flashcardFlipped = false; render(); }
+function prevCard() { state.flashcardIdx = Math.max(0, state.flashcardIdx - 1); state.flashcardFlipped = false; render(); }
+function shuffleCards() { state.flashcardIdx = Math.floor(Math.random() * allFlashcards.length); state.flashcardFlipped = false; render(); }
+function resetProgress() { state.progress = {}; saveProgress(); render(); }
+
+// Nav handlers
+document.getElementById('mainNav').addEventListener('click', e => {
+  if (e.target.dataset.mode) {
+    state.mode = e.target.dataset.mode;
+    state.currentSection = null;
+    document.querySelectorAll('#mainNav button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    render();
+  }
+});
+
+// Keyboard nav for flashcards
+document.addEventListener('keydown', e => {
+  if (state.mode === 'flashcards') {
+    if (e.key === 'ArrowRight') nextCard();
+    else if (e.key === 'ArrowLeft') prevCard();
+    else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+  }
+});
+
+render();
+</script>
+</body>
+</html>
