@@ -228,9 +228,10 @@ function buildAllCards(){
     }});
     // Concepts: forward (term→def) AND reverse (def→term)
     sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term)){
-      const shortDef=c.definition.substring(0,200);
-      cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:`📝 Define:\n\n${c.term}`,back:shortDef,sectionTitle:sec.title});
-      cards.push({id:`${secId}::conceptR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'basic',front:`🔍 What term?\n\n${shortDef.substring(0,150)}`,back:c.term,sectionTitle:sec.title});
+      // Remove the term itself from the definition to avoid giving it away
+      const cleanDef=c.definition.replace(new RegExp(c.term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),'_____').substring(0,200);
+      cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:`📝 Define:\n\n${c.term}`,back:cleanDef,sectionTitle:sec.title});
+      cards.push({id:`${secId}::conceptR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'basic',front:`🔍 What term?\n\n${cleanDef.substring(0,150)}`,back:c.term,sectionTitle:sec.title});
     }});
   }
   // Shuffle by default using seeded shuffle (consistent per session)
