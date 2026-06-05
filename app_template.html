@@ -217,27 +217,32 @@ function isDue(id){const c=S.cards[id];return !c||Date.now()>=c.due}
 function buildAllCards(){
   const cards=[];
   for(const[secId,sec]of Object.entries(DATA)){
-    // Q&A pairs - keep short, skip overly long ones
+    // Q&A pairs - ONLY include single-concept questions with complete answers
     sec.qa_pairs.forEach((qa,i)=>{
-      if(qa.question.length<250)cards.push({id:`${secId}::qa::${i}`,type:'question',section:secId,topic:sec.topic_num,difficulty:qa.difficulty,front:qa.question.substring(0,200),back:qa.answer.substring(0,300),sectionTitle:sec.title});
+      const q=qa.question,a=qa.answer;
+      // Skip: multi-part questions, too long, essay prompts, truncated answers
+      if(q.length>200||a.length<10||a.endsWith('...'))return;
+      if(/name (two|three|four|five|\d+)/i.test(q))return;
+      if(/list (two|three|four|five|\d+)/i.test(q))return;
+      if((q.match(/\?/g)||[]).length>1)return;
+      if(/\n.*\d+\./m.test(q))return; // contains sub-numbered items
+      cards.push({id:`${secId}::qa::${i}`,type:'question',section:secId,topic:sec.topic_num,difficulty:qa.difficulty,front:q.substring(0,200),back:a.substring(0,300),sectionTitle:sec.title});
     });
-    // Commands: forward (cmd→meaning) AND reverse (meaning→cmd)
-    sec.commands.forEach((cmd,i)=>{if(cmd.command.length>3&&cmd.command.length<60&&cmd.context.length>5){
+    // Commands: forward AND reverse - keep only short, clear ones
+    sec.commands.forEach((cmd,i)=>{if(cmd.command.length>3&&cmd.command.length<60&&cmd.context.length>8&&cmd.context.length<120){
       cards.push({id:`${secId}::cmd::${i}`,type:'command',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`💻 What does this do?\n\n$ ${cmd.command}`,back:cmd.context,sectionTitle:sec.title});
       cards.push({id:`${secId}::cmdR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'intermediate',front:`⌨️ What command?\n\n${cmd.context}`,back:`$ ${cmd.command}`,sectionTitle:sec.title});
     }});
-    // Concepts: forward (term→def) AND reverse (def→term)
+    // Concepts: forward AND reverse - one term = one card
     sec.concepts.forEach((c,i)=>{if(c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term)){
-      // Remove the term itself from the definition to avoid giving it away
       const cleanDef=c.definition.replace(new RegExp(c.term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),'_____').substring(0,200);
       cards.push({id:`${secId}::concept::${i}`,type:'concept',section:secId,topic:sec.topic_num,difficulty:'basic',front:`📝 Define:\n\n${c.term}`,back:cleanDef,sectionTitle:sec.title});
       cards.push({id:`${secId}::conceptR::${i}`,type:'reverse',section:secId,topic:sec.topic_num,difficulty:'basic',front:`🔍 What term?\n\n${cleanDef.substring(0,150)}`,back:c.term,sectionTitle:sec.title});
     }});
   }
-  // Shuffle by default using seeded shuffle (consistent per session)
   return shuffleArray(cards);
 }
-function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*( i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const ALL_CARDS=buildAllCards();
 function getDueCards(){return ALL_CARDS.filter(c=>isDue(c.id))}
 function getCardsBySection(secId){return ALL_CARDS.filter(c=>c.section===secId)}
