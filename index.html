@@ -92,8 +92,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .fc{position:relative;width:100%;min-height:240px;cursor:pointer;transform-style:preserve-3d;transition:transform 0.5s}
 .fc.flipped{transform:rotateY(180deg)}
 .fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;padding:2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.fc-front{background:var(--surface);border:2px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,0.05)}
-.fc-back{background:var(--green-light);border:2px solid var(--green);transform:rotateY(180deg)}
+.fc-front{background:var(--surface);border:2px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,0.05);gap:0.8rem}
+.fc-back{background:var(--green-light);border:2px solid var(--green);transform:rotateY(180deg);gap:0.8rem}
 .fc-front h3{font-size:0.95rem;line-height:1.6;font-weight:500}
 .fc-back p{font-size:0.9rem;line-height:1.6;white-space:pre-wrap;word-break:break-word}
 .fc-type{font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem;font-weight:600;text-transform:uppercase;letter-spacing:0.3px}
@@ -449,12 +449,12 @@ function renderFlashcards(){
   if(!filtered.length)return html+`<div class="encourage"><div class="big">🎉</div><h3>All caught up!</h3><p>No cards due right now.</p></div>`;
 
   const idx=S.fcIdx%filtered.length;const card=filtered[idx];
-  const dir=card.type==='reverse'?'🔄 Reverse':'→ Forward';
+  html+=`<div style="text-align:center;margin-bottom:0.8rem"><span style="font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px">${card.sectionTitle}</span></div>`;
   html+=`<div class="fc-wrap"><div class="fc ${S.fcFlipped?'flipped':''}" id="flashcard">
-    <div class="fc-face fc-front"><span class="fc-type">${card.type} · ${card.sectionTitle}</span><h3>${esc(card.front)}</h3></div>
-    <div class="fc-face fc-back"><span class="fc-type">${dir}</span><p>${esc(card.back)}</p></div>
+    <div class="fc-face fc-front"><h3>${esc(card.front)}</h3></div>
+    <div class="fc-face fc-back"><p>${esc(card.back)}</p></div>
   </div></div>
-  <p class="fc-hint">Tap to flip · Arrow keys to navigate · Cards are shuffled across topics</p>
+  <p class="fc-hint">Tap to flip \u00b7 Arrow keys to navigate</p>
   <div class="fc-nav"><button data-fc="prev">←</button><span style="color:var(--muted);font-size:0.8rem">${idx+1}/${filtered.length}</span><button data-fc="next">→</button><button data-fc="shuffle">🔀 Reshuffle</button></div>`;
   if(S.fcFlipped){
     html+=`<div class="grades" style="margin-top:1rem">
@@ -696,6 +696,8 @@ function bindEvents(){
 
 function bindTerminalEvents(){
   const input=document.getElementById('termInput');
+  const termBody=document.getElementById('termBody');
+  if(termBody)termBody.addEventListener('click',()=>{if(input)input.focus()});
   if(input){input.focus();input.addEventListener('keydown',e=>{
     if(e.key==='Enter'){execCommand(input.value);render();setTimeout(()=>{const i=document.getElementById('termInput');if(i)i.focus();const b=document.getElementById('termBody');if(b)b.scrollTop=b.scrollHeight},10)}
     else if(e.key==='ArrowUp'){e.preventDefault();if(termHistIdx<termHistory.length-1){termHistIdx++;input.value=termHistory[termHistIdx]}}
