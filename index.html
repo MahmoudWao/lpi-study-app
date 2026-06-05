@@ -170,6 +170,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .term-input{font-size:16px}
   .stats{grid-template-columns:repeat(2,1fr)}
 }
+
+.dark{--bg:#0f0f1a;--surface:#1a1a2e;--card:#1e293b;--primary:#818cf8;--primary-light:#312e81;--primary-dark:#a5b4fc;--green:#34d399;--green-light:#064e3b;--amber:#fbbf24;--amber-light:#78350f;--red:#f87171;--red-light:#7f1d1d;--text:#e2e8f0;--muted:#94a3b8;--light:#64748b;--border:#334155;--shadow:0 1px 3px rgba(0,0,0,0.3)}
+.dark .answer{background:var(--card)}
+.dark .ex-input{background:var(--bg)}
+.theme-toggle{background:none;border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;cursor:pointer;font-size:0.9rem;color:var(--text)}
 </style>
 </head>
 <body>
@@ -281,7 +286,7 @@ let showEncouragement=false;
 let lastGrade=-1;
 
 function render(){
-  let html=`<div class="header"><h1>🐧 Linux Essentials</h1>${S.streak>0?`<div class="streak">🔥 ${S.streak}</div>`:''}</div>
+  let html=`<div class="header"><h1>🐧 Linux Essentials</h1><button class="theme-toggle" onclick="document.body.classList.toggle('dark');localStorage.setItem('lpi_dark',document.body.classList.contains('dark'))">\u{1F313}</button>${S.streak>0?`<div class="streak">🔥 ${S.streak}</div>`:''}</div>
   <div class="nav" id="nav">
     <button data-m="challenge" class="${S.mode==='challenge'?'active':''}">⚡ Practice</button>
     <button data-m="learn" class="${S.mode==='learn'?'active':''}">📖 Learn</button>
@@ -356,7 +361,7 @@ function renderSectionChallenge(){
       <button class="btn btn-primary" id="revealBtn">Show Answer</button>
       <button class="btn btn-outline btn-sm" id="hintBtn" style="margin-left:0.5rem">💡 Hint</button>
       <div class="answer answer-hidden" id="hintBox" style="border-left-color:var(--amber);background:var(--amber-light);margin-top:1rem">${getHint(card)}</div>
-      <div class="answer answer-hidden" id="answerBox">${esc(card.back)}</div>
+      <div class="answer answer-hidden" id="answerBox">${esc(stripQuestion(card.back,card.front))}</div>
       <div class="grades answer-hidden" id="gradeBox">
         <div class="grade grade-0" data-grade="0"><span class="emoji">😵</span><span class="label">Missed</span></div>
         <div class="grade grade-1" data-grade="1"><span class="emoji">😅</span><span class="label">Hard</span></div>
@@ -368,9 +373,13 @@ function renderSectionChallenge(){
 
 function getHint(card){
   const sec=DATA[card.section];
-  if(sec.explanations&&sec.explanations.length>0)return esc(sec.explanations[0].substring(0,250)+'...');
-  const summary=sec.summary||'';
-  return esc(summary.substring(0,200)+'...');
+  const qStart=card.front.substring(0,30);
+  if(sec.explanations&&sec.explanations.length>0){
+    const h=sec.explanations[0];
+    if(!h.includes(qStart))return esc(h.substring(0,250));
+  }
+  const lines=(sec.summary||sec.lesson_excerpt||'').split('\n').filter(l=>l.trim().length>20&&!l.includes(qStart));
+  return lines.length?esc(lines[0].substring(0,200)):esc('Review the lesson material for this section.');
 }
 
 function renderLearn(){
@@ -714,6 +723,7 @@ document.addEventListener('keydown',e=>{
   if(S.mode==='challenge'&&S.currentSection&&e.key===' '){e.preventDefault();const r=document.getElementById('revealBtn');if(r)r.click()}
 });
 
+if(localStorage.getItem('lpi_dark')==='true')document.body.classList.add('dark');
 updateStreak();render();
 </script>
 </body>
