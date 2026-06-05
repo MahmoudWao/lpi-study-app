@@ -259,6 +259,7 @@ function render(){
   <div class="nav" id="nav">
     <button data-m="challenge" class="${S.mode==='challenge'?'active':''}">⚡ Practice</button>
     <button data-m="learn" class="${S.mode==='learn'?'active':''}">📖 Learn</button>
+    <button data-m="exercises" class="${S.mode==='exercises'?'active':''}">✍️ Exercises</button>
     <button data-m="terminal" class="${S.mode==='terminal'?'active':''}">💻 Terminal</button>
     <button data-m="flashcards" class="${S.mode==='flashcards'?'active':''}">🃏 Cards</button>
     <button data-m="progress" class="${S.mode==='progress'?'active':''}">📊 Stats</button>
@@ -266,6 +267,7 @@ function render(){
   switch(S.mode){
     case 'challenge':html+=renderChallenge();break;
     case 'learn':html+=renderLearn();break;
+    case 'exercises':html+=renderExercises();break;
     case 'terminal':html+=renderTerminal();break;
     case 'flashcards':html+=renderFlashcards();break;
     case 'progress':html+=renderProgress();break;
@@ -368,7 +370,6 @@ function renderSectionLearn(){
       <button data-tab="lesson" class="${tab==='lesson'?'active':''}">Lesson</button>
       <button data-tab="concepts" class="${tab==='concepts'?'active':''}">Concepts</button>
       <button data-tab="commands" class="${tab==='commands'?'active':''}">Commands</button>
-      <button data-tab="exercises" class="${tab==='exercises'?'active':''}">Exercises</button>
     </div>`;
   if(tab==='lesson'){
     html+=`<div class="lesson-text">${esc(sec.full_lesson||sec.lesson_excerpt)}</div>`;
@@ -379,8 +380,21 @@ function renderSectionLearn(){
   }else if(tab==='commands'){
     if(!sec.commands.length)html+=`<p style="color:var(--muted)">No commands in this section.</p>`;
     else sec.commands.forEach(cmd=>{html+=`<div style="background:#1e1e2e;padding:0.6rem 1rem;border-radius:8px;margin-bottom:0.4rem;font-family:monospace"><code style="color:#a6e3a1">$ ${esc(cmd.command)}</code><p style="font-size:0.78rem;color:#a6adc8;margin-top:0.2rem">${esc(cmd.context)}</p></div>`});
-  }else if(tab==='exercises'){
+  }
+  return html+`</div>`;
+}
+
+function renderExercises(){
+  if(S.currentSection){
+    const sec=DATA[S.currentSection];
+    let html=`<button class="back-btn" data-back>← Back</button><div class="panel"><h2>✍️ ${S.currentSection} — ${sec.title}</h2>`;
     sec.qa_pairs.forEach((qa,i)=>{html+=`<div style="background:var(--card);padding:1rem;border-radius:8px;margin-bottom:0.8rem"><p style="font-size:0.88rem;white-space:pre-wrap;word-break:break-word;margin-bottom:0.8rem"><strong>Q${i+1}.</strong> ${esc(qa.question)}</p><button class="btn btn-outline btn-sm" onclick="this.nextElementSibling.classList.toggle('answer-hidden')">Show Answer</button><div class="answer answer-hidden" style="margin-top:0.8rem">${esc(qa.answer)}</div></div>`});
+    return html+`</div>`;
+  }
+  let html=renderPills()+`<div style="text-align:center;margin-bottom:1rem;color:var(--muted);font-size:0.85rem">Guided exercises from the LPI curriculum</div><div class="grid">`;
+  for(const[id,sec]of Object.entries(DATA)){
+    if(S.topicFilter&&sec.topic_num!==S.topicFilter)continue;
+    html+=`<div class="sec-card" data-sec="${id}"><div class="icon" style="background:var(--card)">✍️</div><div class="info"><h3>${sec.title}</h3><div class="meta">Topic ${sec.topic_num} · ${sec.qa_pairs.length} questions</div></div></div>`;
   }
   return html+`</div>`;
 }
