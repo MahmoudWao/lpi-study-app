@@ -162,31 +162,50 @@ function goTOC(){cur=0;render()}
 function changeFontSize(d){fs=Math.max(80,Math.min(160,fs+d*10));localStorage.setItem('lpi_ebook_fs',fs);render()}
 function toggleDark(){document.body.classList.toggle('dark');localStorage.setItem('lpi_ebook_dark',document.body.classList.contains('dark'))}
 
-// Text-to-speech
+// Text-to-speech (Piper + browser fallback)
 let ttsActive=false;
-function getBestVoice(){
-  const voices=speechSynthesis.getVoices();
-  if(!voices.length)return null;
-  const prefs=['Natural','Neural','Google','Enhanced','Samantha','Daniel','Karen'];
-  for(const p of prefs){const v=voices.find(v=>v.name.includes(p)&&v.lang.startsWith('en'));if(v)return v}
-  return voices.find(v=>v.lang.startsWith('en'))||null;
-}
-function toggleTTS(){
+let ttsAudio=null;
+let ebookChunks=[];
+let ebookChunkIdx=0;
+let ebookInterval=null;
+
+async function toggleTTS(){
   if(ttsActive){stopTTS();return}
-  const text=document.getElementById('content').innerText;
-  if(!text||!window.speechSynthesis)return;
+  const el=document.getElementById('content');if(!el)return;
+  const text=(el.textContent||el.innerText).substring(0,5000).trim();
+  if(!text)return;
   ttsActive=true;
   document.getElementById('ttsBtn').textContent='\u23F9\uFE0F';
-  const utter=new SpeechSynthesisUtterance(text);
-  const voice=getBestVoice();
-  if(voice)utter.voice=voice;
-  utter.rate=0.95;utter.pitch=1;
-  utter.onend=()=>stopTTS();
-  utter.onerror=()=>stopTTS();
-  speechSynthesis.speak(utter);
+  // Try Piper
+  try{
+    const r=await fetch('http://localhost:5111/health',{signal:AbortSignal.timeout(1000)});
+    if(r.ok){
+      const resp=await fetch('http://localhost:5111/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+      if(resp.ok){const blob=await resp.blob();ttsAudio=new Audio(URL.createObjectURL(blob));ttsAudio.onended=()=>stopTTS();ttsAudio.play();return}
+    }
+  }catch(e){}
+  // Browser TTS
+  const synth=window.speechSynthesis;synth.cancel();
+  ebookChunks=text.match(/.{1,200}(?:[.!?]\s|$)|.{1,200}(?:\s|$)/g)||[text];
+  ebookChunkIdx=0;
+  speakEbookChunk();
 }
-function stopTTS(){speechSynthesis.cancel();ttsActive=false;document.getElementById('ttsBtn').textContent='\u{1F50A}'}
-if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=()=>{};
+function speakEbookChunk(){
+  if(ebookChunkIdx>=ebookChunks.length){stopTTS();return}
+  const synth=window.speechSynthesis;synth.cancel();
+  const u=new SpeechSynthesisUtterance(ebookChunks[ebookChunkIdx]);
+  u.lang='en-US';u.rate=0.9;
+  u.onend=()=>{ebookChunkIdx++;if(ttsActive)speakEbookChunk()};
+  u.onerror=()=>stopTTS();
+  synth.speak(u);
+  clearInterval(ebookInterval);
+  ebookInterval=setInterval(()=>{if(synth.speaking)synth.resume()},8000);
+}
+function stopTTS(){
+  if(ttsAudio){ttsAudio.pause();ttsAudio=null}
+  speechSynthesis.cancel();clearInterval(ebookInterval);
+  ttsActive=false;document.getElementById('ttsBtn').textContent='\u{1F50A}';
+}
 
 if(localStorage.getItem('lpi_ebook_dark')==='true')document.body.classList.add('dark');
 document.addEventListener('keydown',e=>{

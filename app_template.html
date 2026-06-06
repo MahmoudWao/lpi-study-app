@@ -294,22 +294,22 @@ const root=document.getElementById('root');
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function formatLesson(raw){
   let text=esc(raw);
-  // Split into paragraphs on double newlines
   let paras=text.split(/\n{2,}/);
   let html='';
+  let chunkId=0;
   paras.forEach(p=>{
     p=p.trim();if(!p)return;
-    // Headings
     if(/^(Introduction|Summary|Guided Exercises|Explorational Exercises)$/.test(p)){html+=`<h3 style="color:var(--primary);font-size:1rem;margin:1.5rem 0 0.5rem;font-family:-apple-system,sans-serif">${p}</h3>`;return}
-    // Command blocks (starts with $)
     if(/^\$ /.test(p)){html+=`<pre style="background:var(--card);padding:0.8rem 1rem;border-radius:8px;font-family:monospace;font-size:0.85rem;overflow-x:auto;margin:0.8rem 0;border:1px solid var(--border)">${p}</pre>`;return}
-    // Bullet lists
-    if(/^[•◦]/.test(p)){
-      const items=p.split(/\n/).map(l=>l.replace(/^[•◦]\s*/,'').trim()).filter(Boolean);
+    if(/^[\u2022\u25E6]/.test(p)){
+      const items=p.split(/\n/).map(l=>l.replace(/^[\u2022\u25E6]\s*/,'').trim()).filter(Boolean);
       html+=`<ul style="margin:0.8rem 0 0.8rem 1.2rem">${items.map(i=>`<li style="margin-bottom:0.3rem">${i}</li>`).join('')}</ul>`;return}
-    // Normal paragraph - join single newlines into flowing text
+    // Wrap sentences in spans with data-chunk for highlighting
     const joined=p.replace(/\n/g,' ').replace(/\s{2,}/g,' ');
-    html+=`<p style="margin-bottom:1rem">${joined}</p>`;
+    // Split into ~200 char chunks at sentence boundaries
+    const sentences=joined.match(/.{1,200}(?:[.!?]\s|$)|.{1,200}(?:\s|$)/g)||[joined];
+    const spans=sentences.map(s=>`<span data-chunk="${chunkId++}">${s}</span>`).join('');
+    html+=`<p style="margin-bottom:1rem">${spans}</p>`;
   });
   return html;
 }
@@ -978,8 +978,10 @@ async function toggleLessonTTS(){
   }
   // Fallback: browser TTS
   const synth=window.speechSynthesis;synth.cancel();
-  ttsChunks=[];
-  for(let i=0;i<text.length;i+=TTS_CHUNK_SIZE)ttsChunks.push(text.substring(i,i+TTS_CHUNK_SIZE));
+  // Build chunks matching the data-chunk spans in the rendered HTML
+  const spans=document.querySelectorAll('#lessonText [data-chunk]');
+  ttsChunks=Array.from(spans).map(s=>s.textContent);
+  if(!ttsChunks.length){ttsChunks=[text];} // fallback
   ttsChunkIdx=0;
   speakChunk();
 }
@@ -999,34 +1001,9 @@ function speakChunk(){
 
 function highlightChunk(idx){
   const el=document.getElementById('lessonText');if(!el)return;
-  // Get the full text and wrap current chunk in a highlight span
-  const text=el.textContent||el.innerText;
-  const start=idx*TTS_CHUNK_SIZE;
-  const end=Math.min(start+TTS_CHUNK_SIZE,text.length);
-  // Find the chunk text in the HTML and scroll to it
-  const spans=el.querySelectorAll('.tts-highlight');
-  spans.forEach(s=>{s.outerHTML=s.textContent});
-  // Use TreeWalker to find and highlight text node
-  const range=document.createRange();
-  const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
-  let charCount=0,found=false;
-  while(walker.nextNode()){
-    const node=walker.currentNode;
-    const nodeLen=node.textContent.length;
-    if(!found&&charCount+nodeLen>start){
-      const localStart=start-charCount;
-      const localEnd=Math.min(end-charCount,nodeLen);
-      range.setStart(node,localStart);
-      range.setEnd(node,localEnd);
-      const span=document.createElement('span');
-      span.className='tts-highlight';
-      range.surroundContents(span);
-      span.scrollIntoView({behavior:'smooth',block:'center'});
-      found=true;
-      break;
-    }
-    charCount+=nodeLen;
-  }
+  el.querySelectorAll('[data-chunk]').forEach(s=>s.classList.remove('tts-highlight'));
+  const span=el.querySelector(`[data-chunk="${idx}"]`);
+  if(span){span.classList.add('tts-highlight');span.scrollIntoView({behavior:'smooth',block:'center'})}
 }
 
 function updateTTSProgress(){
@@ -1053,7 +1030,7 @@ function stopLessonTTS(){
   const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x1F50A; Read Aloud';
   const prog=document.getElementById('ttsProgress');if(prog)prog.style.display='none';
   const el=document.getElementById('lessonText');
-  if(el){const hl=el.querySelectorAll('.tts-highlight');hl.forEach(s=>{s.outerHTML=s.textContent})}
+  if(el){el.querySelectorAll('.tts-highlight').forEach(s=>s.classList.remove('tts-highlight'))}
 }
 
 updateStreak();render();
