@@ -77,7 +77,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AppProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/lpi-study-app">
           <AppShell />
         </BrowserRouter>
       </AppProvider>
