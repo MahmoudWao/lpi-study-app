@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AppProvider } from './context/AppContext';
@@ -7,13 +7,14 @@ import Header from './components/Header';
 import Nav from './components/Nav';
 import KeyboardOverlay from './components/KeyboardOverlay';
 import Practice from './components/Practice';
-import Learn from './components/Learn';
-import Exercises from './components/Exercises';
-import Terminal from './components/Terminal';
-import Flashcards from './components/Flashcards';
-import Exam from './components/Exam';
-import Stats from './components/Stats';
 import './styles/theme.css';
+
+const Learn = lazy(() => import('./components/Learn'));
+const Exercises = lazy(() => import('./components/Exercises'));
+const Terminal = lazy(() => import('./components/Terminal'));
+const Flashcards = lazy(() => import('./components/Flashcards'));
+const Exam = lazy(() => import('./components/Exam'));
+const Stats = lazy(() => import('./components/Stats'));
 
 function AppShell() {
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -59,12 +60,12 @@ function AppShell() {
       <Nav />
       <Routes>
         <Route path="/practice" element={<Practice />} />
-        <Route path="/learn" element={<Learn />} />
-        <Route path="/exercises" element={<Exercises />} />
-        <Route path="/terminal" element={<Terminal />} />
-        <Route path="/flashcards" element={<Flashcards />} />
-        <Route path="/exam" element={<Exam />} />
-        <Route path="/stats" element={<Stats />} />
+        <Route path="/learn" element={<Suspense fallback={<div style={{textAlign:'center',padding:'2rem',color:'var(--muted)'}}>Loading...</div>}><Learn /></Suspense>} />
+        <Route path="/exercises" element={<Suspense fallback={null}><Exercises /></Suspense>} />
+        <Route path="/terminal" element={<Suspense fallback={null}><Terminal /></Suspense>} />
+        <Route path="/flashcards" element={<Suspense fallback={null}><Flashcards /></Suspense>} />
+        <Route path="/exam" element={<Suspense fallback={null}><Exam /></Suspense>} />
+        <Route path="/stats" element={<Suspense fallback={null}><Stats /></Suspense>} />
         <Route path="*" element={<Navigate to="/practice" replace />} />
       </Routes>
       {showShortcuts && <KeyboardOverlay onClose={() => setShowShortcuts(false)} />}

@@ -208,6 +208,11 @@ export default function Terminal() {
             <span className="prompt">$</span>{' '}
             <input className="term-input" ref={inputRef} type="text" autoFocus spellCheck="false" autoComplete="off" onKeyDown={handleKeyDown} />
           </div>
+          <div className="term-quick">
+            {['|', '/', '-', '~', '$', '>', '<', '*', '.'].map(ch => (
+              <button key={ch} onClick={() => { if (inputRef.current) { inputRef.current.value += ch; inputRef.current.focus(); } }}>{ch}</button>
+            ))}
+          </div>
         </div>
       </div>
       <p style={{ color: 'var(--muted)', fontSize: '0.73rem', textAlign: 'center', marginTop: '0.5rem' }}>hint · reset · clear</p>

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { useKeyboard } from '../hooks/useKeyboard';
+import { useSwipe } from '../hooks/useSwipe';
 import Mascot from './Mascot';
 import TopicPills from './TopicPills';
 import { isDue } from '../utils/sm2';
@@ -32,6 +33,11 @@ export default function Flashcards() {
     '4': () => { if (state.fcFlipped && card) { setHighlight(3); setTimeout(() => setHighlight(-1), 200); handleGrade(card.id, 3); } },
   }), [state.fcFlipped, card, save]), true);
 
+  const swipeHandlers = useSwipe({
+    onLeft: () => save(s => ({ ...s, fcIdx: s.fcIdx + 1, fcFlipped: false })),
+    onRight: () => save(s => ({ ...s, fcIdx: Math.max(0, s.fcIdx - 1), fcFlipped: false })),
+  });
+
   return (
     <>
       <TopicPills />
@@ -51,7 +57,7 @@ export default function Flashcards() {
             <div style={{ textAlign: 'center', marginBottom: '0.8rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{card.sectionTitle}</span>
             </div>
-            <div className="fc-wrap" onClick={() => save(s => ({ ...s, fcFlipped: !s.fcFlipped }))}>
+            <div className="fc-wrap" onClick={() => save(s => ({ ...s, fcFlipped: !s.fcFlipped }))} {...swipeHandlers}>
               <div className={`fc ${state.fcFlipped ? 'flipped' : ''}`}>
                 <div className="fc-face fc-front"><h3>{esc(card.front)}</h3></div>
                 <div className="fc-face fc-back"><p>{esc(card.back)}</p></div>
