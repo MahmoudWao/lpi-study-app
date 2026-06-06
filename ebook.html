@@ -86,7 +86,13 @@ function renderPage(){
   if(currentPage<0)currentPage=0;
   if(currentPage>=pages.length)currentPage=pages.length-1;
   let text=pages[currentPage];
-  // Format: detect headings (ALL CAPS lines, or lines starting with #/numbers like "1.1 ")
+  // Format TOC entries as clickable links (lines with dots and page numbers)
+  text=text.replace(/^(.+?)\.{3,}\s*(\d+)$/gm,(match,title,pageNum)=>{
+    const targetPage=parseInt(pageNum)+7; // offset: PDF page numbers vs array index
+    return `<a href="#" class="toc-link" data-page="${targetPage}" style="display:flex;justify-content:space-between;padding:0.3rem 0;color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--border)">`+
+      `<span>${title.replace(/\.+$/,'').trim()}</span><span style="color:var(--muted)">${pageNum}</span></a>`;
+  });
+  // Format headings
   text=text.replace(/^(TOPIC \d+:.*)/gm,'<h1>$1</h1>');
   text=text.replace(/^(\d+\.\d+\s+(?:Lesson|Linux|Major|Open|ICT|Command|Using|Creating|Archiving|Searching|Turning|Choosing|Understanding|Where|Your|Basic|Managing|Special).*)/gm,'<h2>$1</h2>');
   text=text.replace(/^(Introduction|Summary|Guided Exercises|Explorational Exercises|Answers to .*)$/gm,'<h3>$1</h3>');
@@ -100,6 +106,8 @@ function renderPage(){
   document.getElementById('progressBar').style.width=((currentPage+1)/pages.length*100)+'%';
   localStorage.setItem('lpi_ebook_page',currentPage.toString());
   window.scrollTo(0,0);
+  // Bind TOC links
+  document.querySelectorAll('.toc-link').forEach(a=>{a.onclick=(e)=>{e.preventDefault();const p=parseInt(a.dataset.page);if(p>=0&&p<pages.length){currentPage=p;renderPage()}}});
 }
 
 document.getElementById('prevBtn').onclick=()=>{currentPage--;renderPage()};
