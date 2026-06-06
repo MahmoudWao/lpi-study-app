@@ -654,7 +654,12 @@ function renderExamQuestion(){
     <p style="font-size:1rem;line-height:1.7;margin-bottom:1.2rem">${q.q}</p>
     <div style="display:grid;gap:0.5rem" id="examOpts">`;
   q.opts.forEach((opt,i)=>{
-    html+=`<button class="sec-card" style="cursor:pointer;padding:0.8rem 1rem;text-align:left" data-opt="${i}"><strong style="color:var(--primary);margin-right:0.5rem">${KEYS[i]}.</strong>${opt}</button>`;
+    let style='cursor:pointer;padding:0.8rem 1rem;text-align:left';
+    if(examState.answered){
+      if(i===q.a){style+=';border-color:var(--green);background:var(--green-light)'}
+      else if(i===examState.selected){style+=';border-color:var(--red);background:var(--red-light)'}
+    }
+    html+=`<button class="sec-card" style="${style}" data-opt="${i}"><strong style="color:var(--primary);margin-right:0.5rem">${KEYS[i]}.</strong>${opt}</button>`;
   });
   html+=`</div>`;
   if(examState.answered){
@@ -891,9 +896,9 @@ function bindEvents(){
     if(examState.answered)return;
     examState.answered=true;
     const q=examState.questions[examState.idx],i=parseInt(b.dataset.opt);
-    if(i===q.a){examState.score++;b.style.borderColor='var(--green)';b.style.background='var(--green-light)'}
-    else{b.style.borderColor='var(--red)';b.style.background='var(--red-light)';examState.missed.push({q:q.q,ans:q.opts[q.a]});
-      document.querySelectorAll('[data-opt]')[q.a].style.borderColor='var(--green)';document.querySelectorAll('[data-opt]')[q.a].style.background='var(--green-light)'}
+    examState.selected=i;
+    if(i===q.a){examState.score++}
+    else{examState.missed.push({q:q.q,ans:q.opts[q.a]})}
     render();
   }});
   document.querySelectorAll('[data-exnext]').forEach(b=>{b.onclick=()=>{
