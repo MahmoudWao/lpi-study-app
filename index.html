@@ -450,7 +450,7 @@ function renderSectionLearn(){
     html+=`<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
       <button class="btn btn-outline btn-sm" onclick="toggleLessonTTS()" id="lessonTtsBtn">🔊 Read Aloud</button>
       <div id="ttsProgress" style="flex:1;min-width:150px;display:none;align-items:center;gap:0.5rem">
-        <input type="range" id="ttsSeek" min="0" max="100" value="0" style="flex:1;cursor:pointer;accent-color:var(--primary)" oninput="seekTTS(this.value)">
+        <input type="range" id="ttsSeek" min="0" max="100" value="0" style="flex:1;cursor:pointer;accent-color:var(--primary);height:20px" onmouseup="seekTTS(this.value)" ontouchend="seekTTS(this.value)" oninput="document.getElementById('ttsTime').textContent=fmtTime(Math.round((this.value/100)*ttsEstTotal))+' / '+fmtTime(ttsEstTotal)">
         <span id="ttsTime" style="font-size:0.72rem;color:var(--muted);min-width:70px;font-family:-apple-system,sans-serif">0:00 / 0:00</span>
       </div>
     </div>`;
@@ -927,8 +927,8 @@ let lessonTtsActive=false;
 let ttsChunks=[];
 let ttsChunkIdx=0;
 let ttsInterval=null;
-let ttsStartTime=0;
-const TTS_CHUNK_SIZE=200; // chars per chunk for seek granularity
+let ttsEstTotal=0;
+const TTS_CHUNK_SIZE=200;
 
 function toggleLessonTTS(){
   const synth=window.speechSynthesis;
@@ -970,10 +970,9 @@ function updateTTSProgress(){
   if(!seek||!time)return;
   const pct=ttsChunks.length?Math.round((ttsChunkIdx/ttsChunks.length)*100):0;
   seek.value=pct;
-  // Estimate time: ~150 words/min at 0.9 rate, ~5 chars/word
-  const totalSec=Math.round(ttsChunks.length*TTS_CHUNK_SIZE/5/150*60/0.9);
+  ttsEstTotal=Math.round(ttsChunks.length*TTS_CHUNK_SIZE/5/150*60/0.9);
   const curSec=Math.round(ttsChunkIdx*TTS_CHUNK_SIZE/5/150*60/0.9);
-  time.textContent=`${fmtTime(curSec)} / ${fmtTime(totalSec)}`;
+  time.textContent=`${fmtTime(curSec)} / ${fmtTime(ttsEstTotal)}`;
 }
 
 function fmtTime(s){return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}
