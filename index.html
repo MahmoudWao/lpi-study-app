@@ -194,6 +194,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .dark .ex-card{background:var(--surface);border-color:var(--border)}
 .dark .grade{background:var(--surface);border-color:var(--border)}
 .theme-toggle{background:none;border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;cursor:pointer;font-size:0.9rem;color:var(--text)}
+
+.tts-highlight{background:var(--highlight,#fffbeb);border-radius:3px;transition:background 0.2s}
+.dark .tts-highlight{background:#3a3a5a}
 </style>
 </head>
 <body>
@@ -960,8 +963,13 @@ async function toggleLessonTTS(){
         ttsAudio.ontimeupdate=()=>{
           const seek=document.getElementById('ttsSeek');
           const time=document.getElementById('ttsTime');
-          if(seek&&ttsAudio.duration){seek.value=Math.round((ttsAudio.currentTime/ttsAudio.duration)*100);
-            time.textContent=fmtTime(Math.round(ttsAudio.currentTime))+' / '+fmtTime(Math.round(ttsAudio.duration))}
+          if(seek&&ttsAudio.duration){
+            const pct=ttsAudio.currentTime/ttsAudio.duration;
+            seek.value=Math.round(pct*100);
+            time.textContent=fmtTime(Math.round(ttsAudio.currentTime))+' / '+fmtTime(Math.round(ttsAudio.duration));
+            const chunkIdx=Math.floor(pct*Math.ceil(text.length/TTS_CHUNK_SIZE));
+            highlightChunk(chunkIdx);
+          }
         };
         ttsAudio.play();
         return;
@@ -979,6 +987,7 @@ async function toggleLessonTTS(){
 function speakChunk(){
   if(ttsChunkIdx>=ttsChunks.length){stopLessonTTS();return}
   const synth=window.speechSynthesis;synth.cancel();
+  highlightChunk(ttsChunkIdx);
   const u=new SpeechSynthesisUtterance(ttsChunks[ttsChunkIdx]);
   u.lang='en-US';u.rate=0.9;
   u.onend=()=>{ttsChunkIdx++;updateTTSProgress();if(lessonTtsActive)speakChunk()};
@@ -986,6 +995,38 @@ function speakChunk(){
   synth.speak(u);updateTTSProgress();
   clearInterval(ttsInterval);
   ttsInterval=setInterval(()=>{if(synth.speaking)synth.resume()},8000);
+}
+
+function highlightChunk(idx){
+  const el=document.getElementById('lessonText');if(!el)return;
+  // Get the full text and wrap current chunk in a highlight span
+  const text=el.textContent||el.innerText;
+  const start=idx*TTS_CHUNK_SIZE;
+  const end=Math.min(start+TTS_CHUNK_SIZE,text.length);
+  // Find the chunk text in the HTML and scroll to it
+  const spans=el.querySelectorAll('.tts-highlight');
+  spans.forEach(s=>{s.outerHTML=s.textContent});
+  // Use TreeWalker to find and highlight text node
+  const range=document.createRange();
+  const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+  let charCount=0,found=false;
+  while(walker.nextNode()){
+    const node=walker.currentNode;
+    const nodeLen=node.textContent.length;
+    if(!found&&charCount+nodeLen>start){
+      const localStart=start-charCount;
+      const localEnd=Math.min(end-charCount,nodeLen);
+      range.setStart(node,localStart);
+      range.setEnd(node,localEnd);
+      const span=document.createElement('span');
+      span.className='tts-highlight';
+      range.surroundContents(span);
+      span.scrollIntoView({behavior:'smooth',block:'center'});
+      found=true;
+      break;
+    }
+    charCount+=nodeLen;
+  }
 }
 
 function updateTTSProgress(){
@@ -1011,6 +1052,8 @@ function stopLessonTTS(){
   lessonTtsActive=false;
   const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x1F50A; Read Aloud';
   const prog=document.getElementById('ttsProgress');if(prog)prog.style.display='none';
+  const el=document.getElementById('lessonText');
+  if(el){const hl=el.querySelectorAll('.tts-highlight');hl.forEach(s=>{s.outerHTML=s.textContent})}
 }
 
 updateStreak();render();
