@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LPI Linux Essentials — Study Guide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#fdfcfa;--text:#333;--muted:#777;--accent:#4338ca;--surface:#fff;--border:#e5e2dd;--code-bg:#f7f5f2;--highlight:#fffbeb}
+body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;font-size:1.15rem;line-height:2}
+body.dark{--bg:#1c1c2e;--text:#ddd;--muted:#999;--accent:#a5b4fc;--surface:#252545;--border:#3a3a5a;--code-bg:#1e1e3a;--highlight:#2a2a4a}
+
+.topbar{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border);padding:0.5rem 1.5rem;display:flex;align-items:center;gap:0.8rem;font-family:-apple-system,sans-serif;font-size:0.85rem}
+.topbar .title{flex:1;font-weight:600;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar button,.topbar select{background:var(--bg);border:1px solid var(--border);padding:0.35rem 0.6rem;border-radius:6px;cursor:pointer;color:var(--text);font-size:0.8rem;font-family:inherit}
+.topbar button:hover{border-color:var(--accent);color:var(--accent)}
+
+.reader{max-width:640px;margin:0 auto;padding:3rem 1.5rem 5rem}
+.content{font-size:inherit}
+.content p{margin-bottom:1.2em}
+.content h1{font-size:1.6rem;font-family:-apple-system,sans-serif;color:var(--accent);margin:2.5rem 0 1rem;padding-bottom:0.5rem;border-bottom:2px solid var(--border);line-height:1.3}
+.content h2{font-size:1.3rem;font-family:-apple-system,sans-serif;color:var(--accent);margin:2rem 0 0.8rem;line-height:1.3}
+.content h3{font-size:1.1rem;font-family:-apple-system,sans-serif;color:var(--muted);margin:1.5rem 0 0.6rem;font-style:italic}
+.content code{font-family:'Courier New',monospace;background:var(--code-bg);padding:0.15em 0.4em;border-radius:4px;font-size:0.9em;color:var(--accent)}
+.content pre{background:var(--code-bg);padding:1rem 1.2rem;border-radius:8px;overflow-x:auto;font-family:'Courier New',monospace;font-size:0.85rem;line-height:1.6;margin:1rem 0;border:1px solid var(--border)}
+.content ul,.content ol{margin:0.8rem 0 0.8rem 1.5rem}
+.content li{margin-bottom:0.4rem}
+.content .toc-entry{display:block;padding:0.4rem 0;border-bottom:1px solid var(--border);color:var(--accent);cursor:pointer;text-decoration:none;font-family:-apple-system,sans-serif;font-size:0.95rem;line-height:1.5}
+.content .toc-entry:hover{background:var(--highlight);padding-left:0.5rem}
+.content .toc-entry.topic{font-weight:700;font-size:1rem;margin-top:1rem;border-bottom:2px solid var(--border)}
+
+.page-nav{display:flex;justify-content:space-between;align-items:center;margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);font-family:-apple-system,sans-serif;font-size:0.85rem}
+.page-nav button{background:var(--accent);color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:6px;cursor:pointer;font-size:0.85rem}
+.page-nav button:disabled{opacity:0.3;cursor:not-allowed}
+.page-nav span{color:var(--muted)}
+
+.progress{height:3px;background:var(--border);position:fixed;top:0;left:0;right:0;z-index:20}
+.progress .fill{height:100%;background:var(--accent);transition:width 0.3s}
+
+@media(max-width:600px){
+  body{font-size:1.05rem;line-height:1.85}
+  .reader{padding:2rem 1rem 4rem}
+  .topbar{padding:0.4rem 0.8rem;gap:0.4rem}
+  .topbar .title{font-size:0.75rem}
+}
+</style>
+</head>
+<body>
+<div class="progress"><div class="fill" id="prog"></div></div>
+<div class="topbar">
+  <a href="index.html" style="color:var(--accent);text-decoration:none;font-weight:500">← App</a>
+  <span class="title">LPI Linux Essentials v1.6</span>
+  <button onclick="goTOC()">☰ TOC</button>
+  <button onclick="changeFontSize(-1)">A−</button>
+  <button onclick="changeFontSize(1)">A+</button>
+  <button onclick="toggleDark()">🌓</button>
+  <select id="pageSelect" onchange="goPage(this.value)"></select>
+</div>
+<div class="reader"><div class="content" id="content"></div>
+<div class="page-nav">
+  <button onclick="go(-1)" id="prevBtn">← Previous</button>
+  <span id="pageInfo"></span>
+  <button onclick="go(1)" id="nextBtn">Next →</button>
+</div></div>
+
+<script>
+const PAGES = __EBOOK_DATA__;
+
+let cur = parseInt(localStorage.getItem('lpi_ebook_page')||'0');
+let fs = parseInt(localStorage.getItem('lpi_ebook_fs')||'115');
+
+// Build page select
+const sel=document.getElementById('pageSelect');
+PAGES.forEach((_,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`Pg ${i+1}`;sel.appendChild(o)});
+
+// Find section start pages for TOC navigation
+const SECTIONS = [];
+PAGES.forEach((p,i)=>{
+  if(/^TOPIC \d+:/.test(p)) SECTIONS.push({page:i,title:p.split('\n')[0],type:'topic'});
+  else if(/^\d+\.\d+ Lesson \d+/.test(p)) SECTIONS.push({page:i,title:p.split('\n')[0],type:'lesson'});
+});
+
+function render(){
+  if(cur<0)cur=0;if(cur>=PAGES.length)cur=PAGES.length-1;
+  let text=PAGES[cur];
+  // Format the text into proper HTML
+  text = formatPage(text);
+  document.getElementById('content').innerHTML=text;
+  document.getElementById('content').style.fontSize=fs+'%';
+  document.getElementById('pageInfo').textContent=`${cur+1} / ${PAGES.length}`;
+  document.getElementById('prevBtn').disabled=cur===0;
+  document.getElementById('nextBtn').disabled=cur===PAGES.length-1;
+  sel.value=cur;
+  document.getElementById('prog').style.width=((cur+1)/PAGES.length*100)+'%';
+  localStorage.setItem('lpi_ebook_page',cur);
+  window.scrollTo(0,0);
+  // Bind TOC clicks
+  document.querySelectorAll('.toc-entry').forEach(a=>a.onclick=()=>{cur=parseInt(a.dataset.page);render()});
+}
+
+function formatPage(raw){
+  // Escape HTML
+  let text = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  
+  // Detect if this is a TOC page (lots of dot leaders)
+  const dotLines = (text.match(/\.{5,}/g)||[]).length;
+  if(dotLines > 5){
+    // Format as TOC
+    const lines = text.split('\n');
+    let html = '<h1>Table of Contents</h1>';
+    lines.forEach(line=>{
+      const clean = line.replace(/\.{3,}\s*\d*\s*$/,'').trim();
+      if(!clean) return;
+      if(clean==='Table of Contents') return;
+      // Find matching section page
+      const match = SECTIONS.find(s=>s.title.includes(clean.substring(0,20)));
+      const targetPage = match ? match.page : -1;
+      if(/^TOPIC \d+:/.test(clean)){
+        html+=`<a class="toc-entry topic" data-page="${targetPage}">${clean}</a>`;
+      } else if(clean.length>3){
+        html+=`<a class="toc-entry" data-page="${targetPage}">${clean}</a>`;
+      }
+    });
+    return html;
+  }
+  
+  // Normal page formatting
+  let lines = text.split('\n');
+  let html = '';
+  let inCode = false;
+  
+  lines.forEach(line=>{
+    // Headings
+    if(/^TOPIC \d+:/.test(line)){html+=`<h1>${line}</h1>`;return}
+    if(/^\d+\.\d+\s+(Lesson|Linux|Major|Open|ICT|Command|Using|Creating|Archiving|Searching|Turning|Choosing|Understanding|Where|Your|Basic|Managing|Special|Network)/.test(line)){html+=`<h2>${line}</h2>`;return}
+    if(/^(Introduction|Summary|Guided Exercises|Explorational Exercises|Answers to)/.test(line)){html+=`<h3>${line}</h3>`;return}
+    // Code blocks (lines starting with $ or containing command patterns)
+    if(/^\$ /.test(line.trim())||/^# /.test(line.trim())){
+      html+=`<pre>${line}</pre>`;return}
+    // Bullet points
+    if(/^[•◦\-]\s/.test(line)){html+=`<li>${line.replace(/^[•◦\-]\s/,'')}</li>`;return}
+    // Empty lines = paragraph break
+    if(line.trim()===''){html+=`</p><p>`;return}
+    // Normal text
+    html+=line+'\n';
+  });
+  
+  // Wrap in paragraph
+  html = '<p>'+html+'</p>';
+  // Clean up empty paragraphs
+  html = html.replace(/<p>\s*<\/p>/g,'');
+  // Inline code: backtick-like patterns or command references
+  html = html.replace(/`([^`]+)`/g,'<code>$1</code>');
+  
+  return html;
+}
+
+function go(dir){cur+=dir;render()}
+function goPage(p){cur=parseInt(p);render()}
+function goTOC(){cur=0;render()}
+function changeFontSize(d){fs=Math.max(80,Math.min(160,fs+d*10));localStorage.setItem('lpi_ebook_fs',fs);render()}
+function toggleDark(){document.body.classList.toggle('dark');localStorage.setItem('lpi_ebook_dark',document.body.classList.contains('dark'))}
+
+if(localStorage.getItem('lpi_ebook_dark')==='true')document.body.classList.add('dark');
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'){cur++;render()}
+  else if(e.key==='ArrowLeft'){cur--;render()}
+});
+render();
+</script>
+</body>
+</html>
