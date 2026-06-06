@@ -897,27 +897,27 @@ document.addEventListener('keydown',e=>{
 if(localStorage.getItem('lpi_dark')==='true')document.body.classList.add('dark');
 // Lesson TTS
 let lessonTtsActive=false;
-function getBestVoice(){
-  const voices=speechSynthesis.getVoices();
-  if(!voices.length)return null;
-  const prefs=['Natural','Neural','Google','Enhanced','Samantha','Daniel','Karen'];
-  for(const p of prefs){const v=voices.find(v=>v.name.includes(p)&&v.lang.startsWith('en'));if(v)return v}
-  return voices.find(v=>v.lang.startsWith('en'))||null;
-}
 function toggleLessonTTS(){
-  if(lessonTtsActive){speechSynthesis.cancel();lessonTtsActive=false;const b=document.getElementById('lessonTtsBtn');if(b)b.textContent='\u{1F50A} Read Aloud';return}
-  const el=document.getElementById('lessonText');if(!el||!window.speechSynthesis)return;
+  const synth=window.speechSynthesis;
+  if(!synth)return;
+  if(lessonTtsActive||synth.speaking){synth.cancel();lessonTtsActive=false;const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x1F50A; Read Aloud';return}
+  const el=document.getElementById('lessonText');
+  if(!el)return;
+  const text=el.textContent||el.innerText;
+  if(!text)return;
+  // Chrome bug: cancel any pending speech first
+  synth.cancel();
+  const u=new SpeechSynthesisUtterance(text.substring(0,5000));
+  u.lang='en-US';
+  u.rate=0.9;
+  u.onend=()=>{lessonTtsActive=false;const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x1F50A; Read Aloud'};
+  u.onerror=(e)=>{console.error('TTS error',e);lessonTtsActive=false;const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x1F50A; Read Aloud'};
   lessonTtsActive=true;
-  const b=document.getElementById('lessonTtsBtn');if(b)b.textContent='\u23F9\uFE0F Stop';
-  const u=new SpeechSynthesisUtterance(el.innerText);
-  const voice=getBestVoice();
-  if(voice)u.voice=voice;
-  u.rate=0.95;u.pitch=1;
-  u.onend=()=>{lessonTtsActive=false;if(b)b.textContent='\u{1F50A} Read Aloud'};
-  u.onerror=()=>{lessonTtsActive=false;if(b)b.textContent='\u{1F50A} Read Aloud'};
-  speechSynthesis.speak(u);
+  const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x23F9;&#xFE0F; Stop';
+  synth.speak(u);
+  // Chrome workaround: keep speech alive
+  const keepAlive=setInterval(()=>{if(!synth.speaking){clearInterval(keepAlive)}else{synth.resume()}},10000);
 }
-if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=()=>{};
 
 updateStreak();render();
 </script>
