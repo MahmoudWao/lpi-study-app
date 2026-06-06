@@ -61,7 +61,7 @@ function SectionLearn({ state, save }) {
     <>
       <button className="back-btn" onClick={() => { tts.stop(); save(s => ({ ...s, currentSection: null })); }}>← Back</button>
       {tts.serverAvailable === false && (
-        <div style={{ background: 'var(--amber-light)', border: '1px solid var(--amber)', borderRadius: '8px', padding: '0.5rem 0.8rem', marginBottom: '0.8rem', fontSize: '0.78rem', color: '#92400e' }}>
+        <div style={{ background: 'var(--amber-light)', border: '1px solid var(--amber)', borderRadius: '8px', padding: '0.5rem 0.8rem', marginBottom: '0.8rem', fontSize: '0.78rem', color: 'var(--amber)' }}>
           🔊 For best audio: <code style={{ fontSize: '0.72rem' }}>docker run -p 8880:8880 ghcr.io/remsky/kokoro-fastapi</code>
         </div>
       )}
