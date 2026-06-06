@@ -141,7 +141,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tabs{display:flex;gap:0.2rem;background:var(--card);padding:0.25rem;border-radius:8px;margin-bottom:1rem}
 .tabs button{flex:1;background:none;border:none;padding:0.5rem;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:500;color:var(--muted)}
 .tabs button.active{background:var(--surface);color:var(--primary);font-weight:600;box-shadow:var(--shadow)}
-.lesson-text{white-space:pre-wrap;word-break:break-word;font-size:0.87rem;line-height:1.8;max-height:500px;overflow-y:auto;color:var(--text)}
+.lesson-text{word-break:break-word;font-size:0.92rem;line-height:1.8;max-height:500px;overflow-y:auto;color:var(--text)}
 
 .back-btn{background:none;border:none;color:var(--primary);cursor:pointer;font-size:0.82rem;padding:0.3rem 0;margin-bottom:0.8rem;font-weight:500}
 .back-btn:hover{text-decoration:underline}
@@ -289,6 +289,27 @@ function getCardsBySection(secId){return ALL_CARDS.filter(c=>c.section===secId)}
 
 const root=document.getElementById('root');
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function formatLesson(raw){
+  let text=esc(raw);
+  // Split into paragraphs on double newlines
+  let paras=text.split(/\n{2,}/);
+  let html='';
+  paras.forEach(p=>{
+    p=p.trim();if(!p)return;
+    // Headings
+    if(/^(Introduction|Summary|Guided Exercises|Explorational Exercises)$/.test(p)){html+=`<h3 style="color:var(--primary);font-size:1rem;margin:1.5rem 0 0.5rem;font-family:-apple-system,sans-serif">${p}</h3>`;return}
+    // Command blocks (starts with $)
+    if(/^\$ /.test(p)){html+=`<pre style="background:var(--card);padding:0.8rem 1rem;border-radius:8px;font-family:monospace;font-size:0.85rem;overflow-x:auto;margin:0.8rem 0;border:1px solid var(--border)">${p}</pre>`;return}
+    // Bullet lists
+    if(/^[•◦]/.test(p)){
+      const items=p.split(/\n/).map(l=>l.replace(/^[•◦]\s*/,'').trim()).filter(Boolean);
+      html+=`<ul style="margin:0.8rem 0 0.8rem 1.2rem">${items.map(i=>`<li style="margin-bottom:0.3rem">${i}</li>`).join('')}</ul>`;return}
+    // Normal paragraph - join single newlines into flowing text
+    const joined=p.replace(/\n/g,' ').replace(/\s{2,}/g,' ');
+    html+=`<p style="margin-bottom:1rem">${joined}</p>`;
+  });
+  return html;
+}
 function stripQuestion(answer,question){
   // Remove repeated question text from start of answer
   const qFirst50=question.substring(0,50).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -427,7 +448,7 @@ function renderSectionLearn(){
     </div>`;
   if(tab==='lesson'){
     html+=`<button class="btn btn-outline btn-sm" onclick="toggleLessonTTS()" id="lessonTtsBtn" style="margin-bottom:1rem">🔊 Read Aloud</button>`;
-    html+=`<div class="lesson-text" id="lessonText">${esc(sec.full_lesson||sec.lesson_excerpt)}</div>`;
+    html+=`<div class="lesson-text" id="lessonText">${formatLesson(sec.full_lesson||sec.lesson_excerpt)}</div>`;
   }else if(tab==='concepts'){
     const valid=sec.concepts.filter(c=>c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term));
     if(valid.length===0)html+=`<p style="color:var(--muted)">See lesson text for concepts.</p>`;
