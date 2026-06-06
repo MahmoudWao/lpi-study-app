@@ -447,7 +447,13 @@ function renderSectionLearn(){
       <button data-tab="commands" class="${tab==='commands'?'active':''}">Commands</button>
     </div>`;
   if(tab==='lesson'){
-    html+=`<button class="btn btn-outline btn-sm" onclick="toggleLessonTTS()" id="lessonTtsBtn" style="margin-bottom:1rem">🔊 Read Aloud</button>`;
+    html+=`<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="toggleLessonTTS()" id="lessonTtsBtn">🔊 Read Aloud</button>
+      <div id="ttsProgress" style="flex:1;min-width:150px;display:none;align-items:center;gap:0.5rem">
+        <input type="range" id="ttsSeek" min="0" max="100" value="0" style="flex:1;cursor:pointer;accent-color:var(--primary)" oninput="seekTTS(this.value)">
+        <span id="ttsTime" style="font-size:0.72rem;color:var(--muted);min-width:70px;font-family:-apple-system,sans-serif">0:00 / 0:00</span>
+      </div>
+    </div>`;
     html+=`<div class="lesson-text" id="lessonText">${formatLesson(sec.full_lesson||sec.lesson_excerpt)}</div>`;
   }else if(tab==='concepts'){
     const valid=sec.concepts.filter(c=>c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term));
@@ -916,28 +922,72 @@ document.addEventListener('keydown',e=>{
 });
 
 if(localStorage.getItem('lpi_dark')==='true')document.body.classList.add('dark');
-// Lesson TTS
+// Lesson TTS with progress
 let lessonTtsActive=false;
+let ttsChunks=[];
+let ttsChunkIdx=0;
+let ttsInterval=null;
+let ttsStartTime=0;
+const TTS_CHUNK_SIZE=200; // chars per chunk for seek granularity
+
 function toggleLessonTTS(){
   const synth=window.speechSynthesis;
   if(!synth)return;
-  if(lessonTtsActive||synth.speaking){synth.cancel();lessonTtsActive=false;const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x1F50A; Read Aloud';return}
+  if(lessonTtsActive||synth.speaking){stopLessonTTS();return}
   const el=document.getElementById('lessonText');
   if(!el)return;
-  const text=el.textContent||el.innerText;
+  const text=(el.textContent||el.innerText).substring(0,5000);
   if(!text)return;
-  // Chrome bug: cancel any pending speech first
   synth.cancel();
-  const u=new SpeechSynthesisUtterance(text.substring(0,5000));
-  u.lang='en-US';
-  u.rate=0.9;
-  u.onend=()=>{lessonTtsActive=false;const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x1F50A; Read Aloud'};
-  u.onerror=(e)=>{console.error('TTS error',e);lessonTtsActive=false;const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x1F50A; Read Aloud'};
+  // Split into chunks for progress tracking and seeking
+  ttsChunks=[];
+  for(let i=0;i<text.length;i+=TTS_CHUNK_SIZE){ttsChunks.push(text.substring(i,i+TTS_CHUNK_SIZE))}
+  ttsChunkIdx=0;
   lessonTtsActive=true;
   const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x23F9;&#xFE0F; Stop';
+  const prog=document.getElementById('ttsProgress');if(prog)prog.style.display='flex';
+  speakChunk();
+}
+
+function speakChunk(){
+  if(ttsChunkIdx>=ttsChunks.length){stopLessonTTS();return}
+  const synth=window.speechSynthesis;
+  synth.cancel();
+  const u=new SpeechSynthesisUtterance(ttsChunks[ttsChunkIdx]);
+  u.lang='en-US';u.rate=0.9;
+  u.onend=()=>{ttsChunkIdx++;updateTTSProgress();if(lessonTtsActive)speakChunk()};
+  u.onerror=()=>stopLessonTTS();
   synth.speak(u);
-  // Chrome workaround: keep speech alive
-  const keepAlive=setInterval(()=>{if(!synth.speaking){clearInterval(keepAlive)}else{synth.resume()}},10000);
+  updateTTSProgress();
+  // Chrome keepalive
+  clearInterval(ttsInterval);
+  ttsInterval=setInterval(()=>{if(synth.speaking)synth.resume()},8000);
+}
+
+function updateTTSProgress(){
+  const seek=document.getElementById('ttsSeek');
+  const time=document.getElementById('ttsTime');
+  if(!seek||!time)return;
+  const pct=ttsChunks.length?Math.round((ttsChunkIdx/ttsChunks.length)*100):0;
+  seek.value=pct;
+  // Estimate time: ~150 words/min at 0.9 rate, ~5 chars/word
+  const totalSec=Math.round(ttsChunks.length*TTS_CHUNK_SIZE/5/150*60/0.9);
+  const curSec=Math.round(ttsChunkIdx*TTS_CHUNK_SIZE/5/150*60/0.9);
+  time.textContent=`${fmtTime(curSec)} / ${fmtTime(totalSec)}`;
+}
+
+function fmtTime(s){return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}
+
+function seekTTS(val){
+  ttsChunkIdx=Math.floor((parseInt(val)/100)*ttsChunks.length);
+  if(lessonTtsActive)speakChunk();
+}
+
+function stopLessonTTS(){
+  speechSynthesis.cancel();clearInterval(ttsInterval);
+  lessonTtsActive=false;
+  const b=document.getElementById('lessonTtsBtn');if(b)b.innerHTML='&#x1F50A; Read Aloud';
+  const prog=document.getElementById('ttsProgress');if(prog)prog.style.display='none';
 }
 
 updateStreak();render();
