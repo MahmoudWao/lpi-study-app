@@ -54,6 +54,7 @@ body.dark{--bg:#1c1c2e;--text:#ddd;--muted:#999;--accent:#a5b4fc;--surface:#2525
   <button onclick="changeFontSize(-1)">A−</button>
   <button onclick="changeFontSize(1)">A+</button>
   <button onclick="toggleDark()">🌓</button>
+  <button onclick="toggleTTS()" id="ttsBtn">🔊</button>
   <select id="pageSelect" onchange="goPage(this.value)"></select>
 </div>
 <div class="reader"><div class="content" id="content"></div>
@@ -160,6 +161,22 @@ function goPage(p){cur=parseInt(p);render()}
 function goTOC(){cur=0;render()}
 function changeFontSize(d){fs=Math.max(80,Math.min(160,fs+d*10));localStorage.setItem('lpi_ebook_fs',fs);render()}
 function toggleDark(){document.body.classList.toggle('dark');localStorage.setItem('lpi_ebook_dark',document.body.classList.contains('dark'))}
+
+// Text-to-speech
+let ttsActive=false;
+function toggleTTS(){
+  if(ttsActive){stopTTS();return}
+  const text=document.getElementById('content').innerText;
+  if(!text||!window.speechSynthesis)return;
+  ttsActive=true;
+  document.getElementById('ttsBtn').textContent='⏹️';
+  const utter=new SpeechSynthesisUtterance(text);
+  utter.rate=parseFloat(localStorage.getItem('lpi_tts_rate')||'1');
+  utter.onend=()=>stopTTS();
+  utter.onerror=()=>stopTTS();
+  speechSynthesis.speak(utter);
+}
+function stopTTS(){speechSynthesis.cancel();ttsActive=false;document.getElementById('ttsBtn').textContent='🔊'}
 
 if(localStorage.getItem('lpi_ebook_dark')==='true')document.body.classList.add('dark');
 document.addEventListener('keydown',e=>{
