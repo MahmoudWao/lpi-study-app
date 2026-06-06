@@ -39,6 +39,9 @@ def health():
     return jsonify({"status": "ok", "model": "en_US-amy-medium"})
 
 if __name__ == "__main__":
-    print("🔊 Piper TTS server starting on http://localhost:5111")
+    import socket
+    ip = socket.gethostbyname(socket.gethostname())
+    print(f"🔊 Piper TTS server starting on http://{ip}:5111")
+    print(f"   Also available at http://localhost:5111")
     print(f"   Model: {MODEL}")
-    app.run(host="127.0.0.1", port=5111)
+    app.run(host="0.0.0.0", port=5111)

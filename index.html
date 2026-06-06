@@ -930,9 +930,13 @@ let ttsInterval=null;
 let ttsEstTotal=0;
 let ttsAudio=null;
 const TTS_CHUNK_SIZE=200;
-const TTS_SERVER='http://localhost:5111/tts';
+const TTS_ENDPOINTS=['http://localhost:5111','http://'+location.hostname+':5111'];
+let TTS_SERVER=null;
 
-async function checkTTSServer(){try{const r=await fetch('http://localhost:5111/health');return r.ok}catch(e){return false}}
+async function checkTTSServer(){
+  for(const ep of TTS_ENDPOINTS){try{const r=await fetch(ep+'/health',{signal:AbortSignal.timeout(1000)});if(r.ok){TTS_SERVER=ep+'/tts';return true}}catch(e){}}
+  return false;
+}
 
 async function toggleLessonTTS(){
   if(lessonTtsActive){stopLessonTTS();return}
