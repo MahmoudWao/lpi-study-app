@@ -897,16 +897,26 @@ document.addEventListener('keydown',e=>{
 if(localStorage.getItem('lpi_dark')==='true')document.body.classList.add('dark');
 // Lesson TTS
 let lessonTtsActive=false;
+function getBestVoice(){
+  const voices=speechSynthesis.getVoices();
+  // Prefer: Google, Microsoft Natural/Neural, enhanced, then any English
+  const prefs=['Natural','Neural','Google','Enhanced','Samantha','Daniel','Karen'];
+  for(const p of prefs){const v=voices.find(v=>v.name.includes(p)&&v.lang.startsWith('en'));if(v)return v}
+  return voices.find(v=>v.lang.startsWith('en'))||voices[0];
+}
 function toggleLessonTTS(){
   if(lessonTtsActive){speechSynthesis.cancel();lessonTtsActive=false;const b=document.getElementById('lessonTtsBtn');if(b)b.textContent='🔊 Read Aloud';return}
   const el=document.getElementById('lessonText');if(!el||!window.speechSynthesis)return;
   lessonTtsActive=true;
   const b=document.getElementById('lessonTtsBtn');if(b)b.textContent='⏹️ Stop';
   const u=new SpeechSynthesisUtterance(el.innerText);
-  u.rate=1;u.onend=()=>{lessonTtsActive=false;if(b)b.textContent='🔊 Read Aloud'};
+  u.voice=getBestVoice();
+  u.rate=0.95;u.pitch=1;
+  u.onend=()=>{lessonTtsActive=false;if(b)b.textContent='🔊 Read Aloud'};
   u.onerror=()=>{lessonTtsActive=false;if(b)b.textContent='🔊 Read Aloud'};
   speechSynthesis.speak(u);
 }
+speechSynthesis.onvoiceschanged=()=>{}; // trigger voice loading
 
 updateStreak();render();
 </script>
