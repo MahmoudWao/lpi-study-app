@@ -426,7 +426,8 @@ function renderSectionLearn(){
       <button data-tab="commands" class="${tab==='commands'?'active':''}">Commands</button>
     </div>`;
   if(tab==='lesson'){
-    html+=`<div class="lesson-text">${esc(sec.full_lesson||sec.lesson_excerpt)}</div>`;
+    html+=`<button class="btn btn-outline btn-sm" onclick="toggleLessonTTS()" id="lessonTtsBtn" style="margin-bottom:1rem">🔊 Read Aloud</button>`;
+    html+=`<div class="lesson-text" id="lessonText">${esc(sec.full_lesson||sec.lesson_excerpt)}</div>`;
   }else if(tab==='concepts'){
     const valid=sec.concepts.filter(c=>c.term.length>3&&c.term.length<35&&!/^(There|This|But|On|The|It|A |An )/i.test(c.term));
     if(valid.length===0)html+=`<p style="color:var(--muted)">See lesson text for concepts.</p>`;
@@ -894,6 +895,19 @@ document.addEventListener('keydown',e=>{
 });
 
 if(localStorage.getItem('lpi_dark')==='true')document.body.classList.add('dark');
+// Lesson TTS
+let lessonTtsActive=false;
+function toggleLessonTTS(){
+  if(lessonTtsActive){speechSynthesis.cancel();lessonTtsActive=false;const b=document.getElementById('lessonTtsBtn');if(b)b.textContent='🔊 Read Aloud';return}
+  const el=document.getElementById('lessonText');if(!el||!window.speechSynthesis)return;
+  lessonTtsActive=true;
+  const b=document.getElementById('lessonTtsBtn');if(b)b.textContent='⏹️ Stop';
+  const u=new SpeechSynthesisUtterance(el.innerText);
+  u.rate=1;u.onend=()=>{lessonTtsActive=false;if(b)b.textContent='🔊 Read Aloud'};
+  u.onerror=()=>{lessonTtsActive=false;if(b)b.textContent='🔊 Read Aloud'};
+  speechSynthesis.speak(u);
+}
+
 updateStreak();render();
 </script>
 </body>
